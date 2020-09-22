@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="dimen" format="float" name="acceleration">1.0</item>
+    <item type="dimen" format="float" name="deceleration">0.75</item>
+    <item type="dimen" format="float" name="max_velocity">15.0</item>
+    <item type="dimen" format="float" name="player_scale">2.0</item>
+    <item type="dimen" format="float" name="player_recovery_time">1.0</item>
+    <item type="dimen" format="float" name="player_flicker_rate">0.1</item>
+    <item type="dimen" format="float" name="player_fire_rate">0.4</item>
+    <item type="dimen" format="float" name="player_reload_speed">0.8</item>
+    <item type="dimen" format="float" name="player_bullet_dir_x">0.0</item>
+    <item type="dimen" format="float" name="player_bullet_dir_y">-1.0</item>
+    <item type="dimen" format="float" name="player_bullet_scale">1.5</item>
+    <item type="dimen" format="float" name="player_bullet_speed">15.0</item>
+    <integer name="max_hp">4</integer>
+    <integer name="player_clip_size">20</integer>
+    <integer name="player_bottom_padding">150</integer>
+</resources>

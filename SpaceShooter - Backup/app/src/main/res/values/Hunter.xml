@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="dimen" format="float" name="hunter_speed">1.0</item>
+    <item type="dimen" format="float" name="hunter_shoot_trigger">15.0</item>
+    <item type="dimen" format="float" name="hunter_scale">2.0</item>
+    <item type="dimen" format="float" name="hunter_recovery_time">1.0</item>
+    <item type="dimen" format="float" name="hunter_flicker_rate">0.1</item>
+    <item type="dimen" format="float" name="hunter_fire_rate">0.4</item>
+    <item type="dimen" format="float" name="hunter_reload_speed">0.8</item>
+    <item type="dimen" format="float" name="hunter_bullet_dir_x">0.0</item>
+    <item type="dimen" format="float" name="hunter_bullet_dir_y">-1.0</item>
+    <item type="dimen" format="float" name="hunter_bullet_scale">1.5</item>
+    <item type="dimen" format="float" name="hunter_bullet_speed">15.0</item>
+    <integer name="hunter_max_hp">4</integer>
+    <integer name="hunter_clip_size">3</integer>
+    <integer name="hunter_pool_size">20</integer>
+</resources>
