@@ -1,7 +1,9 @@
 package com.jukaio.jumpandrun;
 
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -12,10 +14,9 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        m_game = new Game(this);
-        setContentView(m_game);
+        m_game = findViewById(R.id.game);
     }
-    
+
     @Override
     protected void onStart()
     {
@@ -29,20 +30,40 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         m_game.onResume();
     }
-    
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        if(!hasWindowFocus)
+            return;
+
+        View decor = getWindow().getDecorView();
+        int visibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                         View.SYSTEM_UI_FLAG_FULLSCREEN;
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT)
+            visibility |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
+        else
+        {
+            visibility |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                          View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                          View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        }
+        decor.setSystemUiVisibility(visibility);
+    }
     
     @Override
     protected void onPause()
     {
-        m_game.onPause();
         super.onPause();
+        m_game.onPause();
     }
-    
+
     @Override
     protected void onStop()
     {
-        m_game.onStop();
         super.onStop();
+        m_game.onStop();
     }
     
     @Override

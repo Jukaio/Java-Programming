@@ -4,11 +4,13 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.nfc.Tag;
 import android.support.annotation.NonNull;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+
+import com.jukaio.jumpandrun.world.Tilemap.TileMap;
 
 public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callback
 {
@@ -22,17 +24,46 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     
     int m_width = 0;
     int m_height = 0;
-    
+
+    public Game(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        Log.d(TAG, "Game Constructor");
+        initialise();
+    }
+
+    public Game(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        Log.d(TAG, "Game Constructor");
+        initialise();
+    }
+
+    public Game(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+        Log.d(TAG, "Game Constructor");
+        initialise();
+    }
+
     public Game(Context context)
     {
         super(context);
         Log.d(TAG, "Game Constructor");
-        
+        initialise();
+    }
+
+    TileMap m_map;
+
+    void initialise()
+    {
         m_surface_holder = getHolder();
         m_surface_holder.addCallback(this);
+        int zoom = getResources().getInteger(R.integer.zoom);
+        m_surface_holder.setFixedSize(getResources().getInteger(R.integer.screen_width) / zoom,
+                                      getResources().getInteger(R.integer.screen_height) / zoom);
+
+        m_map = new TileMap(getContext(), "tilemap.xml");
         m_paint = new Paint();
     }
-    
+
     @Override
     public void run()
     {
@@ -45,7 +76,7 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     
     private void update()
     {
-    
+
     }
     
     private void render()
@@ -54,10 +85,12 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
             return;
         m_canvas.drawColor(Color.BLACK);
     
-        Log.d(TAG, "Renders");
         m_paint.setColor(Color.RED);
-        m_canvas.drawLine(0, 0, m_width, m_height, m_paint);
-        
+        m_canvas.drawLine(0, 0, getResources().getInteger(R.integer.screen_width),
+                getResources().getInteger(R.integer.screen_height),  m_paint);
+
+        m_map.draw(m_canvas, m_paint);
+
         m_surface_holder.unlockCanvasAndPost(m_canvas);
     }
     
@@ -79,7 +112,7 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     {
         Log.d(TAG, "onResume");
         m_running = true;
-        m_game_thread = new Thread();
+        m_game_thread = new Thread(this);
     }
     
     public void onPause()
@@ -130,7 +163,7 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
         
         m_width = p_width;
         m_height = p_height;
-        m_surface_holder.setFixedSize(m_width, m_height);
+        //m_surface_holder.setFixedSize(m_width, m_height);
         
         if(m_game_thread != null &&
            m_running)
