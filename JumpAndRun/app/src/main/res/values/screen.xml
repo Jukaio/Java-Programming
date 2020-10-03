@@ -2,5 +2,5 @@
 <resources>
     <integer name="screen_width">1920</integer>
     <integer name="screen_height">1080</integer>
-    <integer name="zoom">8</integer>
+    <integer name="zoom">4</integer>
 </resources>

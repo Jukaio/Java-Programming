@@ -1,8 +1,6 @@
 package com.jukaio.jumpandrun;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
@@ -10,20 +8,30 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.jukaio.jumpandrun.world.Tilemap.TileMap;
+import com.jukaio.jumpandrun.ecs.ECS;
+import com.jukaio.jumpandrun.ecs.WorldType;
+import com.jukaio.jumpandrun.ecs.componentmodule.components.Component;
+import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.Gravity;
+import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.RenderCanvas;
+import com.jukaio.jumpandrun.ecs.componentmodule.components.SourceXML;
+import com.jukaio.jumpandrun.ecs.componentmodule.components.Tileset;
+import com.jukaio.jumpandrun.ecs.componentmodule.components.tilemapcomponents.Grid;
+import com.jukaio.jumpandrun.ecs.componentmodule.components.tilemapcomponents.TileMap;
+import com.jukaio.jumpandrun.ecs.componentmodule.components.tilemapcomponents.TileMapCollider;
+import com.jukaio.jumpandrun.ecs.entitymodule.Entity;
+import com.jukaio.jumpandrun.ecs.systemmodule.TileMapRenderer;
+import com.jukaio.jumpandrun.extramath.Vector2;
 
 public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callback
 {
     private final static String TAG                 = "GAME";
     private Thread              m_game_thread       = null;
     private volatile boolean    m_running           = false;
-    
-    private SurfaceHolder       m_surface_holder    = null;
-    private Paint               m_paint             = null;
-    private Canvas              m_canvas            = null;
-    
+
     int m_width = 0;
     int m_height = 0;
+
+    ECS m_ecs;
 
     public Game(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -50,18 +58,83 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
         initialise();
     }
 
-    TileMap m_map;
-
     void initialise()
     {
-        m_surface_holder = getHolder();
-        m_surface_holder.addCallback(this);
-        int zoom = getResources().getInteger(R.integer.zoom);
-        m_surface_holder.setFixedSize(getResources().getInteger(R.integer.screen_width) / zoom,
-                                      getResources().getInteger(R.integer.screen_height) / zoom);
+        //Entity.GAME = this;
 
-        m_map = new TileMap(getContext(), "tilemap.xml");
-        m_paint = new Paint();
+        m_ecs = new ECS();
+
+        create_shared_components();
+
+        create_worlds();
+        construct_world();
+
+        add_systems();
+
+        m_ecs.init();
+        m_ecs.set_world_active(WorldType.LEVEL_ONE);
+    }
+
+    private void create_shared_components()
+    {
+        create_renderer();
+        create_gravity();
+    }
+
+    private void create_worlds()
+    {
+        m_ecs.create_world(WorldType.LEVEL_ONE); // Create a world
+    }
+    private void construct_world()
+    {
+        create_tilemap();
+    }
+    private void create_tilemap()
+    {
+        // Gather a free entity
+        Entity entity = m_ecs.create_entity();
+
+        // Create a pack of components - In this case 5 components
+        Component[] components = new Component[5];
+        SourceXML source = new SourceXML();
+        source.m_source = "tilemap.xml";
+        source.m_context = getContext();
+        components[0] = source;
+        components[1] = new TileMap();
+        components[2]= new Tileset();
+        components[3] = new Grid();
+        components[4] = new TileMapCollider();
+
+        // Register the components
+        m_ecs.register_components(m_ecs.components_to_signature(components));
+
+        // Associate components with entity
+        m_ecs.add_components(entity, components);
+
+        // Place entity in world
+        m_ecs.place_entity(entity, WorldType.LEVEL_ONE);
+    }
+    private void create_renderer()
+    {
+        RenderCanvas renderer = new RenderCanvas();
+        renderer.m_holder = getHolder();
+        renderer.m_holder.addCallback(this);
+        renderer.m_paint = new Paint();
+        int zoom = getResources().getInteger(R.integer.zoom);
+        renderer.m_holder.setFixedSize(getResources().getInteger(R.integer.screen_width) / zoom,
+                getResources().getInteger(R.integer.screen_height) / zoom);
+        m_ecs.register_shared_component(renderer);
+    }
+    private void create_gravity()
+    {
+        Gravity gravity = new Gravity();
+        gravity.m_direction = Vector2.DOWN;
+        gravity.m_drag = 0.9f;
+        m_ecs.register_shared_component(gravity);
+    }
+    void add_systems()
+    {
+        m_ecs.add_system(new TileMapRenderer());
     }
 
     @Override
@@ -73,33 +146,15 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
             render();
         }
     }
-    
+
     private void update()
     {
-
+        m_ecs.update();
     }
-    
+
     private void render()
     {
-        if(!lock_canvas())
-            return;
-        m_canvas.drawColor(Color.BLACK);
-    
-        m_paint.setColor(Color.RED);
-        m_canvas.drawLine(0, 0, getResources().getInteger(R.integer.screen_width),
-                getResources().getInteger(R.integer.screen_height),  m_paint);
-
-        m_map.draw(m_canvas, m_paint);
-
-        m_surface_holder.unlockCanvasAndPost(m_canvas);
-    }
-    
-    private boolean lock_canvas()
-    {
-        if(!m_surface_holder.getSurface().isValid())
-            return false;
-        m_canvas = m_surface_holder.lockCanvas();
-        return (m_canvas != null);
+        m_ecs.render();
     }
     
     public void onStart()

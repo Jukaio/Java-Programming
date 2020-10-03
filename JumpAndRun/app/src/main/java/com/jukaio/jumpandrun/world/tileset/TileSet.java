@@ -4,9 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
-import com.jukaio.jumpandrun.R;
 import com.jukaio.jumpandrun.extramath.Vector2;
-import com.jukaio.jumpandrun.world.Tilemap.Layer;
 import com.jukaio.jumpandrun.world.Tilemap.Tile;
 
 import org.w3c.dom.Document;
@@ -59,6 +57,7 @@ public class TileSet
         m_set_dimensions = new Vector2();
         m_tile_dimensions = new Vector2();
         m_set = new ArrayList<Tile>();
+        m_set.add(new Tile(0, null, 0)); // ADD NULL TILE
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try
@@ -79,13 +78,64 @@ public class TileSet
                 Node node = node_list.item(i);
                 if(node.getNodeType() == Node.ELEMENT_NODE)
                 {
+                    // Fix tileset parsing
                     Element element = (Element)node;
-                    int height = Integer.parseInt(element.getAttribute("height"));
-                    String source = element.getAttribute("source");
+                    if(element.getNodeName().equals("image"))
+                    {
+                        int height = Integer.parseInt(element.getAttribute("height"));
+                        String source = element.getAttribute("source");
 
-                    InputStream bitmap_stream = context.getResources().getAssets().open(source);
-                    m_bitmap = BitmapFactory.decodeStream(bitmap_stream);
-                    m_set_dimensions.m_y = (height / m_tile_dimensions.m_y.intValue());
+                        InputStream bitmap_stream = context.getResources().getAssets().open(source);
+                        m_bitmap = BitmapFactory.decodeStream(bitmap_stream);
+                        m_set_dimensions.m_y = (height / m_tile_dimensions.m_y.intValue());
+                    }
+                    else if(element.getNodeName().equals("tile"))
+                    {
+                        NodeList property_children = element.getChildNodes();
+                        int tile_flag = 0;
+                        for(int j = 0; j < property_children.getLength(); j++)
+                        {
+                            Node property_node = property_children.item(j);
+                            if(property_node.getNodeType() == Node.ELEMENT_NODE)
+                            {
+                                Element tile_element = (Element)property_node;
+                                NodeList tile_children = tile_element.getChildNodes();
+                                for(int k = 0; k < tile_children.getLength(); k++)
+                                {
+                                    Node tile_child = tile_children.item(k);
+                                    if(tile_child.getNodeType() == Node.ELEMENT_NODE)
+                                    {
+                                        Element tile_child_element = (Element)tile_child;
+                                        if(tile_child_element.getAttribute("name").equals("point_flags"))
+                                        {
+                                            tile_flag |= (Integer.parseInt(tile_child_element.getAttribute("value")) << 2);
+                                        }
+                                        else if(tile_child_element.getAttribute("name").equals("first_corner"))
+                                        {
+                                            tile_flag |= Integer.parseInt(tile_child_element.getAttribute("value"));
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+
+                        int id = Integer.parseInt(element.getAttribute("id"));
+                        String type = element.getAttribute("type");
+                        int x = id % m_set_dimensions.m_x.intValue();
+                        int y = id / m_set_dimensions.m_x.intValue();
+
+                        int width = m_tile_dimensions.m_x.intValue();
+                        int height = m_tile_dimensions.m_y.intValue();
+
+                        Bitmap bitmap = Bitmap.createBitmap(m_bitmap,
+                                x * m_tile_dimensions.m_x.intValue(),
+                                y * m_tile_dimensions.m_y.intValue(),
+                                m_tile_dimensions.m_x.intValue(),
+                                m_tile_dimensions.m_y.intValue());
+                        Tile temp = new Tile(id, bitmap, tile_flag);
+                        m_set.add(temp);
+                    }
                 }
             }
         }
@@ -101,7 +151,7 @@ public class TileSet
             e.printStackTrace();
         }
 
-        // TODO: Optimise Bitmap creation
+        /*// TODO: Optimise Bitmap creation
         m_set.add(new Tile(0, null));
         for(int y = 0; y < m_set_dimensions.m_y.intValue(); y++)
         {
@@ -114,6 +164,6 @@ public class TileSet
                                                   m_tile_dimensions.m_y.intValue());
                 m_set.add(new Tile(y * m_set_dimensions.m_x.intValue() + x, temp));
             }
-        }
+        }*/
     }
 }

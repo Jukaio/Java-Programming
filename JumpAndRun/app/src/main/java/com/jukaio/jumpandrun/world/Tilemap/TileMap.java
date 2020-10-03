@@ -2,6 +2,7 @@ package com.jukaio.jumpandrun.world.Tilemap;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 
 import com.jukaio.jumpandrun.extramath.Vector2;
@@ -24,17 +25,17 @@ import javax.xml.parsers.ParserConfigurationException;
 public class TileMap
 {
     TileSet m_tile_set;
-
+    int m_colour;
     Vector2 m_map_dimensions;
     Vector2 m_tile_dimensions;
-    ArrayList<Layer> m_layers;
+    ArrayList<TileLayer> m_layers;
 
     // p_filename = "tilemap.xml"
     public TileMap(Context context, String p_filename)
     {
         m_map_dimensions = new Vector2();
         m_tile_dimensions = new Vector2();
-        m_layers = new ArrayList<Layer>();
+        m_layers = new ArrayList<TileLayer>();
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try
@@ -58,15 +59,32 @@ public class TileMap
                 if(node.getNodeType() == Node.ELEMENT_NODE)
                 {
                     Element element = (Element)node;
-                    if(element.getNodeName().equals("layer"))
-                    {
-                        m_layers.add(new Layer(element, m_tile_set));
-                    }
-                    else if(element.getNodeName().equals("tileset"))
+                    if(element.getNodeName().equals("tileset"))
                     {
                         String tileset = element.getAttribute("source");
                         m_tile_set = TileSet.create(context, tileset);
                     }
+                    else if(element.getNodeName().equals("properties"))
+                    {
+                        NodeList property_children = element.getChildNodes();
+                        for(int j = 0; j < property_children.getLength(); j++)
+                        {
+                            if(property_children.item(j).getNodeType() == Node.ELEMENT_NODE)
+                            {
+                                Element property_child_element = (Element) property_children.item(j);
+                                if(property_child_element.getNodeName().equals("property"))
+                                {
+                                    if(property_child_element.getAttribute("name").equals("colour"))
+                                        m_colour = Color.parseColor((property_child_element.getAttribute("value")));
+                                }
+                            }
+                        }
+                    }
+                    else if(element.getNodeName().equals("layer"))
+                    {
+                        m_layers.add(new TileLayer(element, m_tile_set));
+                    }
+
                 }
             }
         }
@@ -81,11 +99,13 @@ public class TileMap
         {
             e.printStackTrace();
         }
+
     }
 
     public void draw(Canvas p_canvas, Paint p_paint)
     {
-        for (Layer layer : m_layers)
+        p_canvas.drawColor(m_colour);
+        for (TileLayer layer : m_layers)
         {
             layer.draw(p_canvas, p_paint);
         }
