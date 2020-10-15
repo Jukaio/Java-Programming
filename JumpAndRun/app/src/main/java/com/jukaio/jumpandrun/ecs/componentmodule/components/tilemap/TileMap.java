@@ -1,4 +1,4 @@
-package com.jukaio.jumpandrun.ecs.componentmodule.components.tilemapcomponents;
+package com.jukaio.jumpandrun.ecs.componentmodule.components.tilemap;
 
 
 import com.jukaio.jumpandrun.ecs.componentmodule.components.Component;

@@ -1,10 +1,9 @@
-package com.jukaio.jumpandrun.ecs.componentmodule.components.tilemapcomponents;
+package com.jukaio.jumpandrun.ecs.componentmodule.components.tilemap;
 
 import android.graphics.Bitmap;
 
 import com.jukaio.jumpandrun.ecs.componentmodule.components.Component;
 import com.jukaio.jumpandrun.ecs.componentmodule.components.ComponentType;
-import com.jukaio.jumpandrun.ecs.componentmodule.components.tilemapcomponents.Tile;
 import com.jukaio.jumpandrun.extramath.Vector2;
 
 import java.util.ArrayList;

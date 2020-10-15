@@ -1,15 +1,22 @@
-package com.jukaio.jumpandrun.ecs.componentmodule.components;
+package com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents;
 
-public class InputController extends Component
+import com.jukaio.jumpandrun.ecs.componentmodule.components.Component;
+import com.jukaio.jumpandrun.ecs.componentmodule.components.ComponentType;
+
+public class InputController extends SharedComponent
 {
     
     @Override
-    public ComponentType get_type()
+    public SharedComponentType get_type()
     {
-        return ComponentType.INPUT_CONTROLLER;
+        return SharedComponentType.INPUT_CONTROLLER;
     }
     
     public float m_horizontal = 0.0f;
     public float m_vertical = 0.0f;
-    public int m_button_mask = 0;
+    public boolean m_jump = false;
+    
+    public float m_prev_horizontal = 0.0f;
+    public float m_prev_vertical = 0.0f;
+    public boolean m_prev_jump = false;
 }
