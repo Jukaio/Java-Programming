@@ -9,24 +9,24 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.jukaio.jumpandrun.ecs.ECS;
-import com.jukaio.jumpandrun.ecs.WorldType;
-import com.jukaio.jumpandrun.ecs.componentmodule.components.Component;
+import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.InputController;
+import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.SharedComponentType;
+import com.jukaio.jumpandrun.ecs.worldmodule.LevelZero;
+import com.jukaio.jumpandrun.ecs.worldmodule.WorldType;
 import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.Gravity;
 import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.RenderCanvas;
-import com.jukaio.jumpandrun.ecs.componentmodule.components.SourceXML;
-import com.jukaio.jumpandrun.ecs.componentmodule.components.Tileset;
-import com.jukaio.jumpandrun.ecs.componentmodule.components.tilemapcomponents.Grid;
-import com.jukaio.jumpandrun.ecs.componentmodule.components.tilemapcomponents.TileMap;
-import com.jukaio.jumpandrun.ecs.componentmodule.components.tilemapcomponents.TileMapCollider;
-import com.jukaio.jumpandrun.ecs.entitymodule.Entity;
-import com.jukaio.jumpandrun.ecs.systemmodule.TileMapRenderer;
 import com.jukaio.jumpandrun.extramath.Vector2;
+import com.jukaio.jumpandrun.inputhandling.InputManager;
 
 public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callback
 {
     private final static String TAG                 = "GAME";
     private Thread              m_game_thread       = null;
     private volatile boolean    m_running           = false;
+
+    private InputManager m_input_manager = null;
+    private InputController m_input_shared_component = null;
+
 
     int m_width = 0;
     int m_height = 0;
@@ -65,11 +65,8 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
         m_ecs = new ECS();
 
         create_shared_components();
-
-        create_worlds();
-        construct_world();
-
-        add_systems();
+        
+        m_ecs.add_world(new LevelZero(m_ecs, getContext()), WorldType.LEVEL_ONE);
 
         m_ecs.init();
         m_ecs.set_world_active(WorldType.LEVEL_ONE);
@@ -79,41 +76,9 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     {
         create_renderer();
         create_gravity();
+        create_input_controller();
     }
 
-    private void create_worlds()
-    {
-        m_ecs.create_world(WorldType.LEVEL_ONE); // Create a world
-    }
-    private void construct_world()
-    {
-        create_tilemap();
-    }
-    private void create_tilemap()
-    {
-        // Gather a free entity
-        Entity entity = m_ecs.create_entity();
-
-        // Create a pack of components - In this case 5 components
-        Component[] components = new Component[5];
-        SourceXML source = new SourceXML();
-        source.m_source = "tilemap.xml";
-        source.m_context = getContext();
-        components[0] = source;
-        components[1] = new TileMap();
-        components[2]= new Tileset();
-        components[3] = new Grid();
-        components[4] = new TileMapCollider();
-
-        // Register the components
-        m_ecs.register_components(m_ecs.components_to_signature(components));
-
-        // Associate components with entity
-        m_ecs.add_components(entity, components);
-
-        // Place entity in world
-        m_ecs.place_entity(entity, WorldType.LEVEL_ONE);
-    }
     private void create_renderer()
     {
         RenderCanvas renderer = new RenderCanvas();
@@ -129,12 +94,18 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     {
         Gravity gravity = new Gravity();
         gravity.m_direction = Vector2.DOWN;
-        gravity.m_drag = 0.9f;
+        gravity.m_drag = 3.0f;
         m_ecs.register_shared_component(gravity);
     }
-    void add_systems()
+    public void create_input_controller()
     {
-        m_ecs.add_system(new TileMapRenderer());
+        m_input_shared_component = new InputController();
+        m_ecs.register_shared_component(m_input_shared_component);
+    }
+    
+    public void set_controls(InputManager p_controls)
+    {
+        m_input_manager = p_controls;
     }
 
     @Override
@@ -142,8 +113,23 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     {
         while(m_running)
         {
+            input();
             update();
             render();
+        }
+    }
+    
+    private void input()
+    {
+        if(m_input_manager != null)
+        {
+            m_input_shared_component.m_prev_horizontal = m_input_shared_component.m_horizontal;
+            m_input_shared_component.m_prev_vertical = m_input_shared_component.m_vertical;
+            m_input_shared_component.m_prev_jump = m_input_shared_component.m_jump;
+        
+            m_input_shared_component.m_horizontal = m_input_manager.m_horizontal;
+            m_input_shared_component.m_vertical = m_input_manager.m_vertical;
+            m_input_shared_component.m_jump = m_input_manager.m_jump;
         }
     }
 
@@ -198,6 +184,9 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     public void onDestroy()
     {
         Log.d(TAG, "onDestroy");
+        RenderCanvas renderer = m_ecs.get_shared_component(SharedComponentType.RENDER_CANVAS);
+        renderer.m_holder.removeCallback(this);
+        m_ecs.destroy();
         m_game_thread = null;
     }
     

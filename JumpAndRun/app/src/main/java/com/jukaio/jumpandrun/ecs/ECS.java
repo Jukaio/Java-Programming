@@ -14,8 +14,12 @@ import com.jukaio.jumpandrun.ecs.entitymodule.EntityManager;
 import com.jukaio.jumpandrun.ecs.systemmodule.System;
 import com.jukaio.jumpandrun.ecs.systemmodule.SystemManager;
 import com.jukaio.jumpandrun.ecs.systemmodule.SystemType;
+import com.jukaio.jumpandrun.ecs.worldmodule.World;
+import com.jukaio.jumpandrun.ecs.worldmodule.WorldManager;
+import com.jukaio.jumpandrun.ecs.worldmodule.WorldType;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class ECS
@@ -27,7 +31,6 @@ public class ECS
     private SystemManager s = null;
     private SharedComponentsManager sc = null;
     private WorldManager w = null;
-
     private ArrayList<System> m_systems;
 
     public ECS()
@@ -40,23 +43,7 @@ public class ECS
         sc = new SharedComponentsManager();
         w = new WorldManager();
     }
-
-    public Entity create_entity()
-    {
-        return e.create_entity();
-    }
-
-    public void create_world(WorldType p_type)
-    {
-        World world = new World();
-        world.m_entities = new ArrayList<>();
-        w.add_world(world, p_type);
-    }
-    public void set_world_active(WorldType p_type)
-    {
-        w.set_world_active(p_type);
-    }
-
+    
     public void init()
     {
         for(WorldType type : WorldType.values())
@@ -76,14 +63,10 @@ public class ECS
 
     public void update()
     {
-        ElementSignaturePair<World> world_data = w.get_active_world_pair();
+        World world = w.get_active_world();
         for(System system : m_systems)
         {
-            final int system_signature = s.get_signature(system);
-            if((system_signature & world_data.m_signature) == system_signature)
-            {
-                system.update(this, world_data.m_element.m_entities);
-            }
+            system.update(this, world.m_entities);
         }
     }
 
@@ -95,59 +78,56 @@ public class ECS
             return;
         renderer.m_canvas.drawColor(Color.BLACK);
 
-        ElementSignaturePair<World> world_data = w.get_active_world_pair();
+        World world = w.get_active_world();
         for(System system : m_systems)
         {
-            final int system_signature = s.get_signature(system);
-            if((system_signature & world_data.m_signature) == system_signature)
-            {
-                system.render(this, world_data.m_element.m_entities);
-            }
+            system.render(this, world.m_entities);
         }
 
         renderer.m_holder.unlockCanvasAndPost(renderer.m_canvas);
-
-        s.get_system(SystemType.UNLOCK_CANVAS);
     }
 
-    public void place_entity(Entity p_enity, WorldType p_world)
+    public Entity create_entity()
     {
-        ElementSignaturePair<World> world = w.get_pair(p_world);
-        world.m_signature |= e.get_signature(p_enity);
-        world.m_element.m_entities.add(p_enity);
+        return e.create_entity();
     }
-
-    public void add_world(World p_world, WorldType p_type, int p_signature)
+    public void add_world(World p_world, WorldType p_type)
     {
-        w.add_world(p_world, p_type, p_signature);
+        w.add_world(p_world, p_type);
     }
-
+    
+    public void set_world_active(WorldType p_type)
+    {
+        w.set_world_active(p_type);
+    }
+    public World get_active_world()
+    {
+        return w.get_active_world();
+    }
+    
     public void register_shared_component(SharedComponent p_component)
     {
         sc.add_shared_component(p_component);
     }
-
-    public void add_shared_component(Entity p_entity, ComponentType p_type)
+    public void add_shared_component(Entity p_entity, SharedComponentType p_shared_type)
     {
-        Component component = get_component(p_entity, p_type);
-        add_component(p_entity, component);
+        if(!sc.is_registered(p_shared_type))
+            throw new AssertionError("SHARED COMPONENT NOT REGISTERED >:(");
+        e.add_signature(p_entity, p_shared_type.as_bitmask() << ComponentType.values().length);
     }
-
     public <T extends SharedComponent> T get_shared_component(SharedComponentType p_type)
     {
         return (T) sc.get_shared_component(p_type);
     }
-
     public void register_components(int p_signature)
     {
         c.register_components(p_signature);
     }
-
     public void register_component(ComponentType p_type)
     {
         c.register_component(p_type);
     }
-
+    
     public int components_to_signature(Component[] p_components)
     {
         int signature = 0;
@@ -157,7 +137,6 @@ public class ECS
         }
         return signature;
     }
-
     public int components_to_signature(ComponentType[] p_types)
     {
         int signature = 0;
@@ -183,7 +162,11 @@ public class ECS
         e.add_signature(p_entity, p_component.get_type().as_bitmask());
         c.add_component(p_entity, p_component);
     }
-
+    
+    public <T extends Component> Collection<T> get_all_components_of_type(ComponentType p_type)
+    {
+        return (Collection<T>) c.get_all_components_of_type(p_type);
+    }
 
     public void remove_component(Entity p_entity, Component p_component)
     {
@@ -193,6 +176,8 @@ public class ECS
 
     public void add_system(System p_system)
     {
+        if(m_systems.contains(p_system))
+            return;
         m_systems.add(p_system);
     }
 
@@ -227,5 +212,19 @@ public class ECS
 
         p_renderer.m_canvas = p_renderer.m_holder.lockCanvas();
         return (p_renderer.m_canvas != null);
+    }
+    
+    public void destroy()
+    {
+        e.destroy();
+        c.destory();
+        sc.destroy();
+        s.destroy();
+        w.destroy();
+        e = null;
+        c = null;
+        sc = null;
+        s = null;
+        w = null;
     }
 }

@@ -1,6 +1,8 @@
 package com.jukaio.jumpandrun.extramath;
 
 
+import java.util.Vector;
+
 public class Vector2
 {
     public static final Vector2 INVALID = new Vector2(Float.NaN, Float.NaN);
@@ -27,6 +29,7 @@ public class Vector2
         m_x = p_x;
         m_y = p_y;
     }
+    
 
     public Number m_x;
     public Number m_y;

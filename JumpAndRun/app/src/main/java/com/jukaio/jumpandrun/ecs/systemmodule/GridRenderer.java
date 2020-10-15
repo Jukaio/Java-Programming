@@ -7,7 +7,7 @@ import com.jukaio.jumpandrun.ecs.ECS;
 import com.jukaio.jumpandrun.ecs.componentmodule.components.ComponentType;
 import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.RenderCanvas;
 import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.SharedComponentType;
-import com.jukaio.jumpandrun.ecs.componentmodule.components.tilemapcomponents.Grid;
+import com.jukaio.jumpandrun.ecs.componentmodule.components.tilemap.Grid;
 import com.jukaio.jumpandrun.ecs.entitymodule.Entity;
 
 import java.util.ArrayList;

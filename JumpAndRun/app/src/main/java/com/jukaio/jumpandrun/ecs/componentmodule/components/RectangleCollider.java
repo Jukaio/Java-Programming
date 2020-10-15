@@ -4,7 +4,7 @@ import android.graphics.RectF;
 
 public class RectangleCollider extends Component
 {
-    public RectF bounts;
+    public RectF m_bounds = new RectF();
 
     @Override
     public ComponentType get_type() {

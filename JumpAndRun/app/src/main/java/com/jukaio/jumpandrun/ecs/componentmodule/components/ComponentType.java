@@ -10,9 +10,14 @@ public enum ComponentType
     TILE_SET(3),
     SOURCE_XML(4),
     GRID(5),
-    SPRITE(6),
+    SINGLE_TILE(6),
     RECTANGLE_COLLIDER(7),
-    PLAYER(8);
+    POINT_COLLIDER(8),
+    LINE_COLLIDER(9),
+    MOVEMENT_SENSOR(10),
+    FAMILY(11),
+    KINEMATICS(12),
+    JUMP(13);
 
     private int m_value;
     private ComponentType(int value)

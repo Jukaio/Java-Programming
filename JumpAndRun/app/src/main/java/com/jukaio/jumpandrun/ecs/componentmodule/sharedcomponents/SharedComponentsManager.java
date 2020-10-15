@@ -18,6 +18,17 @@ public class SharedComponentsManager
     {
         return (T) m_shared_components.get(p_type);
     }
+    
+    public boolean is_registered(SharedComponentType p_type)
+    {
+        return m_shared_components.containsKey(p_type);
+    }
 
    private HashMap<SharedComponentType, SharedComponent> m_shared_components;
+   
+   public void destroy()
+   {
+        m_shared_components.clear();
+        m_shared_components = null;
+   }
 }

@@ -5,6 +5,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.jukaio.jumpandrun.inputhandling.InputManager;
+import com.jukaio.jumpandrun.inputhandling.TouchController;
+
 public class MainActivity extends AppCompatActivity
 {
     private Game m_game;
@@ -15,6 +18,8 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         m_game = findViewById(R.id.game);
+        InputManager controls = new TouchController(findViewById(R.id.touchControl));
+        m_game.set_controls(controls);
     }
 
     @Override

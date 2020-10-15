@@ -8,12 +8,11 @@ public class EntityManager
 {
     private ArrayList<Entity> m_available_entities = new ArrayList<Entity>();
     private int[] m_signatures = new int[Entity.MAX_ENTITIES];
-
-    private long m_last_entity;
+    private long m_entity_in_world_count;
 
     public EntityManager()
     {
-        m_last_entity = 0;
+        m_entity_in_world_count = 0;
 
         for(int i = 0; i < Entity.MAX_ENTITIES; i++)
         {
@@ -27,18 +26,16 @@ public class EntityManager
         // TODO: Check if m_last_entity > MAX_ENTITIES
         Entity id = m_available_entities.get(0);
         m_available_entities.remove(0);
-        m_last_entity++;
+        m_entity_in_world_count++;
         return id;
     }
 
-    Entity destroy_entity(Entity p_entity)
+    public void destroy_entity(Entity p_entity)
     {
         // TODO: Check if m_last_entity > MAX_ENTITIES
-        Entity id = m_available_entities.get(0);
         m_signatures[p_entity.get_id()] = 0;
-        m_available_entities.remove(p_entity.get_id());
-        m_last_entity--;
-        return id;
+        m_available_entities.add(p_entity);
+        m_entity_in_world_count--;
     }
 
     public void set_signature(Entity p_entity, int p_signature)
@@ -61,6 +58,18 @@ public class EntityManager
     public int get_signature(Entity p_entity)
     {
         return m_signatures[p_entity.get_id()];
+    }
+    
+    public void destroy()
+    {
+        m_available_entities.clear();
+        m_entity_in_world_count = 0;
+        
+        for(int i = 0; i < m_signatures.length; i++)
+        {
+            m_signatures[i] = 0;
+        }
+        m_signatures = null;
     }
 
 }
