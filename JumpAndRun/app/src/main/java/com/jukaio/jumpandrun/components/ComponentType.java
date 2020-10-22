@@ -1,14 +1,15 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.components;
 
 public enum ComponentType
 {
     UNKNOWN,
     BITMAP,
     INPUT,
-    GRAVITY,
     KINEMATIC,
-    WORLD_COLLISION,
+    WORLD_PHYSICS,
     WALL_SENSORS,
     GROUND_SENSORS,
-    RECORDER
+    RECORDER,
+    JUMP,
+    RECTANGLE_COLLIDER
 }

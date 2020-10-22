@@ -1,7 +1,9 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.components;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+
+import com.jukaio.jumpandrun.Entity;
 
 public class RecorderComponent extends Component
 {
@@ -12,7 +14,7 @@ public class RecorderComponent extends Component
         return m_previous_state;
     }
     
-    protected RecorderComponent(Entity p_entity)
+    public RecorderComponent(Entity p_entity)
     {
         super(p_entity);
         m_previous_state = new Entity(p_entity);
@@ -22,6 +24,12 @@ public class RecorderComponent extends Component
     public ComponentType get_type()
     {
         return ComponentType.RECORDER;
+    }
+    
+    @Override
+    public void start()
+    {
+    
     }
     
     @Override
@@ -43,11 +51,6 @@ public class RecorderComponent extends Component
     
     }
     
-    @Override
-    public void fixed_update()
-    {
-    
-    }
     
     @Override
     public void late_update(float p_dt)

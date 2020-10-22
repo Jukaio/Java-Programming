@@ -1,7 +1,9 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.components;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+
+import com.jukaio.jumpandrun.Entity;
 
 public abstract class Component
 {
@@ -22,12 +24,9 @@ public abstract class Component
     }
     public abstract ComponentType get_type();
     
-    public void pre_update(float p_dt)
-    {
-    
-    }
+    abstract public void start();
+    abstract public void pre_update(float p_dt);
     abstract public void update(float p_dt);
-    abstract public void fixed_update();
     abstract public void late_update(float p_dt);
     abstract public void render(Canvas p_canvas, Paint p_paint);
     

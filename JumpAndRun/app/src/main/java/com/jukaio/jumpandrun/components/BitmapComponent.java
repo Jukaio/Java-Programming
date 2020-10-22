@@ -1,8 +1,10 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.components;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+
+import com.jukaio.jumpandrun.Entity;
 
 public class BitmapComponent extends Component
 {
@@ -21,16 +23,23 @@ public class BitmapComponent extends Component
     }
     
     @Override
-    public void update(float p_dt)
+    public void start()
     {
     
     }
     
     @Override
-    public void fixed_update()
+    public void pre_update(float p_dt)
     {
     
     }
+    
+    @Override
+    public void update(float p_dt)
+    {
+    
+    }
+    
     
     @Override
     public void late_update(float p_dt)

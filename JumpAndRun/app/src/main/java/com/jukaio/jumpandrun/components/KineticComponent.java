@@ -1,9 +1,10 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.components;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 
+import com.jukaio.jumpandrun.Entity;
+import com.jukaio.jumpandrun.XML;
 import com.jukaio.jumpandrun.extramath.Formulas;
 import com.jukaio.jumpandrun.extramath.Vector2;
 
@@ -12,9 +13,9 @@ import org.w3c.dom.Element;
 public class KineticComponent extends Component
 {
     private Vector2 m_acceleration = new Vector2();
-    private Vector2 m_deceleration = new Vector2();
     private Vector2 m_velocity = new Vector2();
     private Vector2 m_maximum_speed = new Vector2();
+    private float m_damp = 0.0f;
     
     public Vector2 get_max_speed()
     {
@@ -49,7 +50,7 @@ public class KineticComponent extends Component
         return m_velocity;
     }
     
-    protected KineticComponent(Entity p_entity, Element p_data)
+    public KineticComponent(Entity p_entity, Element p_data)
     {
         super(p_entity);
         m_velocity.m_x = 0.0f;
@@ -57,8 +58,7 @@ public class KineticComponent extends Component
         
         m_maximum_speed.m_x = XML.parse_float(p_data, "max_speed_x");
         m_maximum_speed.m_y = XML.parse_float(p_data, "max_speed_y");
-        m_deceleration.m_x = XML.parse_float(p_data, "deceleration_x");
-        m_deceleration.m_y = XML.parse_float(p_data, "deceleration_y");
+        m_damp = XML.parse_float(p_data, "damp");
     }
     
     @Override
@@ -68,11 +68,14 @@ public class KineticComponent extends Component
     }
     
     @Override
+    public void start()
+    {
+    
+    }
+    
+    @Override
     public void pre_update(float p_dt)
     {
-        m_velocity.m_x = 0.0f;
-        m_velocity.m_y = 0.0f;
-        
         m_acceleration.m_x = 0.0f;
         m_acceleration.m_y = 0.0f;
     }
@@ -84,24 +87,10 @@ public class KineticComponent extends Component
     }
     
     @Override
-    public void fixed_update()
-    {
-    
-    }
-    
-    @Override
     public void late_update(float p_dt)
     {
         update_velocity(this);
-    
-        float x = get_entity().get_position().m_x.floatValue();
-        float y = get_entity().get_position().m_y.floatValue();
-        
-        x += m_velocity.m_x.floatValue() * p_dt;
-        y += m_velocity.m_y.floatValue() * p_dt;
-        
-        get_entity().set_position(x, y);
-        Log.d("Velo", Float.toString(m_velocity.m_x.floatValue()));
+
     }
     
     @Override
@@ -113,7 +102,6 @@ public class KineticComponent extends Component
     private static final double EPSILON = 0.0001;
     private static void update_velocity(KineticComponent p_kinematic)
     {
-    
         float accel_x = p_kinematic.get_acceleration().m_x.floatValue();
         float accel_y = p_kinematic.get_acceleration().m_y.floatValue();
     
@@ -125,38 +113,26 @@ public class KineticComponent extends Component
     
         float to_apply_x = current_vel_x;
         float to_apply_y = current_vel_y;
-        if(Formulas.length(accel_x, accel_y) > 0)
-        {
-            float next_vel_x = current_vel_x + accel_x;
-            float next_vel_y = current_vel_y + accel_y;
-            
-            float direction_x = (next_vel_x <= 0 + EPSILON && next_vel_x >= 0 - EPSILON) ?
-                                0.0f :
-                                next_vel_x / Math.abs(next_vel_x);
-            float direction_y = (next_vel_y <= 0 + EPSILON && next_vel_y >= 0 - EPSILON) ?
-                                0.0f :
-                                next_vel_y / Math.abs(next_vel_y);
+    
+        float next_vel_x = current_vel_x + accel_x;
+        float next_vel_y = current_vel_y + accel_y;
+    
+        float direction_x = (next_vel_x <= 0 + EPSILON && next_vel_x >= 0 - EPSILON) ?
+                0.0f :
+                next_vel_x / Math.abs(next_vel_x);
+        float direction_y = (next_vel_y <= 0 + EPSILON && next_vel_y >= 0 - EPSILON) ?
+                0.0f :
+                next_vel_y / Math.abs(next_vel_y);
+    
+        next_vel_x = next_vel_x / (1 + p_kinematic.m_damp);
+        next_vel_y = next_vel_y / (1 + p_kinematic.m_damp);
         
-            to_apply_x = (Math.abs(next_vel_x) > max_speed_x) ? direction_x * max_speed_x : next_vel_x;
-            to_apply_y = (Math.abs(next_vel_y) > max_speed_y) ? direction_y * max_speed_y : next_vel_y;
-        }
-        else if(Formulas.length(current_vel_x, current_vel_y) > 0)
-        {
-            float direction_x = (current_vel_x <= 0 + EPSILON && current_vel_x >= 0 - EPSILON) ?
-                                0.0f :
-                                current_vel_x / Math.abs(current_vel_x);
-            float direction_y = (current_vel_y <= 0 + EPSILON && current_vel_y >= 0 - EPSILON) ?
-                                0.0f :
-                                current_vel_y / Math.abs(current_vel_y);
-            float next_vel_x = Math.abs(current_vel_x) - (p_kinematic.m_deceleration.m_x.floatValue());
-            float next_vel_y = Math.abs(current_vel_y) - (p_kinematic.m_deceleration.m_y.floatValue());
-            
-            to_apply_x = (next_vel_x > 0) ? next_vel_x * direction_x : 0.0f;
-            to_apply_y = (next_vel_y > 0) ? next_vel_y * direction_y : 0.0f;
-        }
-  
+        to_apply_x = (Math.abs(next_vel_x) > max_speed_x) ? direction_x * max_speed_x : next_vel_x;
+        to_apply_y = (Math.abs(next_vel_y) > max_speed_y) ? direction_y * max_speed_y : next_vel_y;
+    
+        
+    
         p_kinematic.set_velocity(to_apply_x,
                                  to_apply_y);
-    
     }
 }
