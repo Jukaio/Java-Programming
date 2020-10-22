@@ -73,6 +73,8 @@ public class CollisionDetection
                 distance_lhs_full <= 1.0f);
     }
     
+    
+    
     public static boolean LineLine(Line p_lhs, Line p_rhs, PointF p_collision_points)
     {
         final float distance_rhs_a = (p_rhs.m_end.x - p_rhs.m_start.x) * (p_lhs.m_start.y - p_rhs.m_start.y);

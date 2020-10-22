@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<player name="player" width="16" height="16">
+ <Components>
+  <Bitmap/>
+  <Kinematic max_speed_x="2.0" max_speed_y="40.0" damp="0.1"/>
+  <Ground_sensors offset_x="5" offset_y="1"/>
+  <Wall_sensors offset_x="1"/>
+  <Jump/>
+  <Input acceleration_x="0.2" acceleration_y="0.0" jump_force="10.2"/>
+  <Recorder/>
+  <World_physics gravity="3.4"/>
+ </Components>
+</player>

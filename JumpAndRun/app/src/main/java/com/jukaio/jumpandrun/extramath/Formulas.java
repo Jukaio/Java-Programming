@@ -1,5 +1,9 @@
 package com.jukaio.jumpandrun.extramath;
 
+import android.graphics.RectF;
+
+import com.jukaio.jumpandrun.components.RectangleColliderComponent;
+
 public class Formulas
 {
     public static float distance(float p_lhs_x, float p_lhs_y, float p_rhs_x, float p_rhs_y)
@@ -52,4 +56,19 @@ public class Formulas
             return p_max;
         return p_x;
     }
+    
+    public static void rotate_line(Line p_line, float p_local_x, float p_local_y, float p_cos, float p_sin)
+    {
+        float start_x = p_line.m_start.x;
+        float start_y = p_line.m_start.y;
+        float end_x = p_line.m_end.x;
+        float end_y = p_line.m_end.y;
+
+        
+        p_line.m_start.x = (int)((p_cos * (start_x - p_local_x)) - (p_sin * (start_y - p_local_y)) + p_local_x);
+        p_line.m_start.y = (int)((p_sin * (start_x - p_local_x)) + (p_cos * (start_y - p_local_y)) + p_local_y);
+        p_line.m_end.x = (int)((p_cos * (end_x - p_local_x)) - (p_sin * (end_y - p_local_y)) + p_local_x);
+        p_line.m_end.y = (int)((p_sin * (end_x - p_local_x)) + (p_cos * (end_y - p_local_y)) + p_local_y);
+    }
+    
 }

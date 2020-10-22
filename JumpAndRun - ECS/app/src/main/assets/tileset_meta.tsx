@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tileset version="1.4" tiledversion="1.4.2" name="tileset" tilewidth="16" tileheight="16" tilecount="45" columns="9">
+ <editorsettings>
+  <export target="tileset_meta.xml" format="tsx"/>
+ </editorsettings>
+ <image source="../../../../../../../iCloudDrive/Art/PixelArt/DoneGames/Platformer/Tiles.png" trans="003039" width="144" height="80"/>
+ <tile id="0" type="NULL"/>
+ <tile id="1" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="3"/>
+   <property name="point_flags" type="int" value="11"/>
+  </properties>
+ </tile>
+ <tile id="2" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="15"/>
+  </properties>
+ </tile>
+ <tile id="3" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="1"/>
+   <property name="point_flags" type="int" value="15"/>
+  </properties>
+ </tile>
+ <tile id="4" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="7"/>
+  </properties>
+ </tile>
+ <tile id="5" type="Air">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="0"/>
+  </properties>
+ </tile>
+ <tile id="6" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="0"/>
+  </properties>
+ </tile>
+ <tile id="7" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="0"/>
+  </properties>
+ </tile>
+ <tile id="8" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="0"/>
+  </properties>
+ </tile>
+ <tile id="9" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="2"/>
+   <property name="point_flags" type="int" value="15"/>
+  </properties>
+ </tile>
+ <tile id="10" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="3"/>
+   <property name="point_flags" type="int" value="9"/>
+  </properties>
+ </tile>
+ <tile id="11" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="12" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="1"/>
+   <property name="point_flags" type="int" value="2"/>
+  </properties>
+ </tile>
+ <tile id="13" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="1"/>
+   <property name="point_flags" type="int" value="6"/>
+  </properties>
+ </tile>
+ <tile id="14" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="3"/>
+   <property name="point_flags" type="int" value="15"/>
+  </properties>
+ </tile>
+ <tile id="15" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="3"/>
+   <property name="point_flags" type="int" value="11"/>
+  </properties>
+ </tile>
+ <tile id="16" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="3"/>
+  </properties>
+ </tile>
+ <tile id="17" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="7"/>
+  </properties>
+ </tile>
+ <tile id="18" type="Deco"/>
+ <tile id="19" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="2"/>
+   <property name="point_flags" type="int" value="13"/>
+  </properties>
+ </tile>
+ <tile id="20" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="15"/>
+  </properties>
+ </tile>
+ <tile id="21" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="15"/>
+  </properties>
+ </tile>
+ <tile id="22" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="1"/>
+   <property name="point_flags" type="int" value="14"/>
+  </properties>
+ </tile>
+ <tile id="23" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="15"/>
+  </properties>
+ </tile>
+ <tile id="24" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="3"/>
+   <property name="point_flags" type="int" value="9"/>
+  </properties>
+ </tile>
+ <tile id="25" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="0"/>
+  </properties>
+ </tile>
+ <tile id="26" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="1"/>
+   <property name="point_flags" type="int" value="6"/>
+  </properties>
+ </tile>
+ <tile id="27" type="Deco"/>
+ <tile id="28" type="Lethal"/>
+ <tile id="29" type="Lethal"/>
+ <tile id="30" type="Lethal"/>
+ <tile id="31" type="Lethal"/>
+ <tile id="32" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="1"/>
+   <property name="point_flags" type="int" value="2"/>
+  </properties>
+ </tile>
+ <tile id="33" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="34" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="0"/>
+   <property name="point_flags" type="int" value="5"/>
+  </properties>
+ </tile>
+ <tile id="35" type="Ground">
+  <properties>
+   <property name="first_corner" type="int" value="1"/>
+   <property name="point_flags" type="int" value="10"/>
+  </properties>
+ </tile>
+ <tile id="36" type="Collect"/>
+ <tile id="37" type="Collect"/>
+ <tile id="38" type="Collect"/>
+ <tile id="39" type="Collect"/>
+ <tile id="40" type="Player"/>
+ <tile id="41" type="Player"/>
+ <tile id="42" type="Player"/>
+</tileset>

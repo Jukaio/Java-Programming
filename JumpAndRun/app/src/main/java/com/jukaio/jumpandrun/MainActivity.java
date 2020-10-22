@@ -5,9 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-import com.jukaio.jumpandrun.inputhandling.InputManager;
-import com.jukaio.jumpandrun.inputhandling.TouchController;
-
 public class MainActivity extends AppCompatActivity
 {
     private Game m_game;

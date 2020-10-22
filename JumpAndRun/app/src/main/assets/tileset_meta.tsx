@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.4" tiledversion="1.4.2" name="tileset" tilewidth="16" tileheight="16" tilecount="45" columns="9">
+<tileset version="1.2" tiledversion="1.3.5" name="tileset" tilewidth="16" tileheight="16" tilecount="45" columns="9">
  <editorsettings>
   <export target="tileset_meta.xml" format="tsx"/>
  </editorsettings>
- <image source="../../../../../../../iCloudDrive/Art/PixelArt/DoneGames/Platformer/Tiles.png" trans="003039" width="144" height="80"/>
+ <image source="tileset.png" trans="003039" width="144" height="80"/>
  <tile id="0" type="NULL"/>
  <tile id="1" type="Ground">
   <properties>

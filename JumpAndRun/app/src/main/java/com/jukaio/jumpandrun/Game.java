@@ -1,6 +1,8 @@
 package com.jukaio.jumpandrun;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
@@ -8,30 +10,26 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.jukaio.jumpandrun.ecs.ECS;
-import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.InputController;
-import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.SharedComponentType;
-import com.jukaio.jumpandrun.ecs.worldmodule.LevelZero;
-import com.jukaio.jumpandrun.ecs.worldmodule.WorldType;
-import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.Gravity;
-import com.jukaio.jumpandrun.ecs.componentmodule.sharedcomponents.RenderCanvas;
-import com.jukaio.jumpandrun.extramath.Vector2;
-import com.jukaio.jumpandrun.inputhandling.InputManager;
-
 public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callback
 {
+    private class Renderer
+    {
+        public SurfaceHolder m_holder;
+        public Canvas m_canvas;
+        public Paint m_paint;
+    }
+
     private final static String TAG                 = "GAME";
     private Thread              m_game_thread       = null;
     private volatile boolean    m_running           = false;
+    private Renderer            m_renderer          = null;
+    
 
     private InputManager m_input_manager = null;
-    private InputController m_input_shared_component = null;
-
+    private WorldManager m_world_manager = new WorldManager();
 
     int m_width = 0;
     int m_height = 0;
-
-    ECS m_ecs;
 
     public Game(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -62,45 +60,35 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     {
         //Entity.GAME = this;
 
-        m_ecs = new ECS();
 
         create_shared_components();
-        
-        m_ecs.add_world(new LevelZero(m_ecs, getContext()), WorldType.LEVEL_ONE);
+        m_world_manager.create_world("level_two.xml", getContext());
 
-        m_ecs.init();
-        m_ecs.set_world_active(WorldType.LEVEL_ONE);
     }
 
     private void create_shared_components()
     {
         create_renderer();
-        create_gravity();
-        create_input_controller();
+    }
+    
+    private boolean lock_canvas(Renderer p_renderer)
+    {
+        if(!p_renderer.m_holder.getSurface().isValid())
+            return false;
+
+        p_renderer.m_canvas = p_renderer.m_holder.lockCanvas();
+        return (p_renderer.m_canvas != null);
     }
 
     private void create_renderer()
     {
-        RenderCanvas renderer = new RenderCanvas();
-        renderer.m_holder = getHolder();
-        renderer.m_holder.addCallback(this);
-        renderer.m_paint = new Paint();
+        m_renderer = new Renderer();
+        m_renderer.m_holder = getHolder();
+        m_renderer.m_holder.addCallback(this);
+        m_renderer.m_paint = new Paint();
         int zoom = getResources().getInteger(R.integer.zoom);
-        renderer.m_holder.setFixedSize(getResources().getInteger(R.integer.screen_width) / zoom,
+        m_renderer.m_holder.setFixedSize(getResources().getInteger(R.integer.screen_width) / zoom,
                 getResources().getInteger(R.integer.screen_height) / zoom);
-        m_ecs.register_shared_component(renderer);
-    }
-    private void create_gravity()
-    {
-        Gravity gravity = new Gravity();
-        gravity.m_direction = Vector2.DOWN;
-        gravity.m_drag = 3.0f;
-        m_ecs.register_shared_component(gravity);
-    }
-    public void create_input_controller()
-    {
-        m_input_shared_component = new InputController();
-        m_ecs.register_shared_component(m_input_shared_component);
     }
     
     public void set_controls(InputManager p_controls)
@@ -111,36 +99,41 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     @Override
     public void run()
     {
+        m_world_manager.start();
+    
+        double time_point = System.nanoTime();
+        double delta_time = System.nanoTime() - time_point;
+        final double ns = 1.0 / 1000000000.0;
+        
         while(m_running)
         {
-            input();
-            update();
+            delta_time = System.nanoTime() - time_point;
+            time_point = System.nanoTime();
+            
+            update((float)(delta_time * ns));
+            Log.d("DELTA", Double.toString(delta_time * ns));
             render();
         }
     }
-    
-    private void input()
-    {
-        if(m_input_manager != null)
-        {
-            m_input_shared_component.m_prev_horizontal = m_input_shared_component.m_horizontal;
-            m_input_shared_component.m_prev_vertical = m_input_shared_component.m_vertical;
-            m_input_shared_component.m_prev_jump = m_input_shared_component.m_jump;
-        
-            m_input_shared_component.m_horizontal = m_input_manager.m_horizontal;
-            m_input_shared_component.m_vertical = m_input_manager.m_vertical;
-            m_input_shared_component.m_jump = m_input_manager.m_jump;
-        }
-    }
 
-    private void update()
+    private void update(float p_dt)
     {
-        m_ecs.update();
+        m_world_manager.update(p_dt);
     }
+    
+    
 
     private void render()
     {
-        m_ecs.render();
+        if(!lock_canvas(m_renderer))
+            return;
+        m_renderer.m_canvas.drawColor(Color.BLACK);
+
+        m_world_manager.render(m_renderer.m_canvas, m_renderer.m_paint);
+
+
+
+        m_renderer.m_holder.unlockCanvasAndPost(m_renderer.m_canvas);
     }
     
     public void onStart()
@@ -184,9 +177,7 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     public void onDestroy()
     {
         Log.d(TAG, "onDestroy");
-        RenderCanvas renderer = m_ecs.get_shared_component(SharedComponentType.RENDER_CANVAS);
-        renderer.m_holder.removeCallback(this);
-        m_ecs.destroy();
+        m_renderer.m_holder.removeCallback(this);
         m_game_thread = null;
     }
     
