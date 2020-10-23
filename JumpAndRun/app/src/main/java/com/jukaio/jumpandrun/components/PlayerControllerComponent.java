@@ -9,7 +9,7 @@ import com.jukaio.jumpandrun.XML;
 
 import org.w3c.dom.Element;
 
-public class InputComponent extends Component
+public class PlayerControllerComponent extends Component
 {
     KineticComponent m_kinematic = null;
     JumpComponent m_jump = null;
@@ -19,7 +19,10 @@ public class InputComponent extends Component
     float m_speed_y = 0.0f;
     float m_jump_force = 0.0f;
     
-    public InputComponent(Entity p_entity, Element p_data)
+    float spawn_x = 0.0f;
+    float spawn_y = 0.0f;
+    
+    public PlayerControllerComponent(Entity p_entity, Element p_data)
     {
         super(p_entity);
         m_speed_x = XML.parse_float(p_data, "acceleration_x");
@@ -30,7 +33,7 @@ public class InputComponent extends Component
     @Override
     public ComponentType get_type()
     {
-        return ComponentType.INPUT;
+        return ComponentType.PLAYER_CONTROLLER;
     }
     
     @Override
@@ -39,6 +42,8 @@ public class InputComponent extends Component
         m_kinematic = get_entity().get_component(ComponentType.KINEMATIC);
         m_jump = get_entity().get_component(ComponentType.JUMP);
         m_ground_sensors = get_entity().get_component(ComponentType.GROUND_SENSORS);
+        spawn_x = get_entity().get_position().m_x.floatValue();
+        spawn_y = get_entity().get_position().m_y.floatValue();
     }
     
     @Override
@@ -73,5 +78,16 @@ public class InputComponent extends Component
     public void render(Canvas p_canvas, Paint p_paint)
     {
     
+    }
+    
+    @Override
+    public void on_collision(Entity p_other)
+    {
+        switch (p_other.get_type())
+        {
+            case LETHAL:
+                get_entity().set_position(spawn_x, spawn_y);
+                break;
+        }
     }
 }
