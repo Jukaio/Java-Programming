@@ -18,11 +18,16 @@ public abstract class Component
         m_entity = p_other.m_entity;
     }
     
-    Entity get_entity()
+    public Entity get_entity()
     {
         return m_entity;
     }
     public abstract ComponentType get_type();
+    
+    public void on_collision(Entity p_other)
+    {
+    
+    }
     
     abstract public void start();
     abstract public void pre_update(float p_dt);

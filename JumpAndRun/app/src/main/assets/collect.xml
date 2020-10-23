@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collect name="player" width="16" height="16" origin_x="0.5" origin_y="0.5">
+ <Components>
+  <Bitmap/>
+  <Kinematic max_speed_x="2.0" max_speed_y="40.0" damp="0.1"/>
+  <Ground_sensors offset_x="5" offset_y="1"/>
+  <Wall_sensors offset_x="1" offset_y="2"/>
+  <Coin bob_force="7.2"/>
+  <Rectangle_collider offset_x="0" offset_y="0"/>
+  <Jump/>
+  <World_physics gravity="3.4" detection_range_x="2" detection_range_y="2"/>
+ </Components>
+</collect>

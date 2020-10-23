@@ -1,42 +1,58 @@
 package com.jukaio.jumpandrun;
 
-public abstract class InputManager {
-    private static float m_vertical = 0.0f;
-    private static float m_horizontal = 0.0f;
-    private static boolean m_jump = false;
+import java.util.ArrayList;
 
-    public abstract void onStart();
-    public abstract void onStop();
-    public abstract void onPause();
-    public abstract void onResume();
-    
-    public static float get_vertical()
+public class InputManager {
+    private static ArrayList<InputDevice> m_devices = new ArrayList<>();
+
+    public void onStart()
     {
-        return m_vertical;
+        for(InputDevice d : m_devices)
+            d.on_start();
+    }
+    public void onStop()
+    {
+        for(InputDevice d : m_devices)
+            d.on_stop();
+    }
+    public void onPause()
+    {
+        for(InputDevice d : m_devices)
+            d.on_pause();
+    }
+    public void onResume()
+    {
+        for(InputDevice d : m_devices)
+            d.on_resume();
+    }
+    public void on_destroy()
+    {
+        for(InputDevice d : m_devices)
+            d.on_destroy();
     }
     
-    protected void set_vertical(float p_vertical)
+    public void add_device(InputDevice p_device)
     {
-        m_vertical = p_vertical;
+        m_devices.add(p_device);
     }
     
     public static float get_horizontal()
     {
-        return m_horizontal;
-    }
-    
-    protected void set_horizontal(float p_horizontal)
-    {
-        m_horizontal = p_horizontal;
+        float to_return = 0;
+        for(InputDevice d : m_devices)
+            to_return += d.get_horizontal();
+        if(to_return > 0)
+            return 1;
+        else if(to_return < 0)
+            return -1;
+        return 0;
     }
     
     public static boolean is_jump()
     {
-        return m_jump;
-    }
-    
-    protected void set_jump(boolean p_jump)
-    {
-        m_jump = p_jump;
+        boolean to_return = false;
+        for(InputDevice d : m_devices)
+            to_return |= d.get_jump();
+        return to_return;
     }
 }

@@ -11,6 +11,7 @@ public abstract class Transform
     private Vector2 m_scale = null;
     private Vector2 m_dimenstions = null;
     private float m_rotation = 0.0f;
+    private Vector2 m_origin = null;
 
     public Transform()
     {
@@ -19,6 +20,7 @@ public abstract class Transform
         m_scale = new Vector2(1, 1);
         m_dimenstions = new Vector2(0, 0);
         m_rotation = 0.0f;
+        m_origin = new Vector2(0.5f, 0.5f);
     }
 
     public Transform(Transform p_other)
@@ -30,6 +32,11 @@ public abstract class Transform
         m_rotation = p_other.m_rotation;
     }
 
+    final public void set_origin(float x, float y)
+     {
+         m_origin.m_x = x;
+         m_origin.m_y = y;
+     }
    final public void set_position(float x, float y)
     {
         m_position.m_x = x;
@@ -50,6 +57,10 @@ public abstract class Transform
         m_rotation = p_degrees;
     }
 
+    final public Vector2 get_origin()
+    {
+        return m_origin;
+    }
     final public Vector2 get_position()
     {
         return m_position;
@@ -67,17 +78,36 @@ public abstract class Transform
         return m_dimenstions;
     }
 
-    final public Matrix get_matrix()
+
+/*    final public Matrix get_matrix()
     {
         float origin_x = m_dimenstions.m_x.floatValue() * 0.5f;
-        float origin_y = m_dimenstions.m_x.floatValue() * 0.5f;
+        float origin_y = m_dimenstions.m_y.floatValue() * 0.5f;
         
         m_transform.reset();
         m_transform.setRotate(m_rotation, origin_x, origin_y);
-        m_transform.postTranslate(m_position.m_x.floatValue() - m_dimenstions.m_x.floatValue() * 0.5f,
-                                  m_position.m_y.floatValue() - m_dimenstions.m_y.floatValue() * 0.5f);
+        m_transform.postTranslate(m_position.m_x.floatValue() - (m_dimenstions.m_x.floatValue() * 0.5f),
+                                  m_position.m_y.floatValue() - (m_dimenstions.m_y.floatValue() * 0.5f));
         m_transform.preScale(m_scale.m_x.floatValue(), m_scale.m_y.floatValue(), origin_x, origin_y);
 
         return m_transform;
     }
+    
+ */
+    
+    final public Matrix get_matrix()
+    {
+        float origin_x = m_dimenstions.m_x.floatValue() * m_origin.m_x.floatValue();
+        float origin_y = m_dimenstions.m_y.floatValue() * m_origin.m_y.floatValue();
+        
+        m_transform.reset();
+        m_transform.setRotate(m_rotation, origin_x, origin_y);
+        m_transform.postTranslate(m_position.m_x.floatValue() - m_dimenstions.m_x.floatValue() * m_origin.m_x.floatValue(),
+                                  m_position.m_y.floatValue() - m_dimenstions.m_y.floatValue() * m_origin.m_y.floatValue());
+        m_transform.preScale(m_scale.m_x.floatValue(), m_scale.m_y.floatValue(), origin_x, origin_y);
+
+        return m_transform;
+    }
+    
+    
 }

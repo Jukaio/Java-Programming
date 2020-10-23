@@ -118,8 +118,8 @@ public class KineticComponent extends Component
         float next_vel_y = current_vel_y + accel_y;
     
         float direction_x = (next_vel_x <= 0 + EPSILON && next_vel_x >= 0 - EPSILON) ?
-                0.0f :
-                next_vel_x / Math.abs(next_vel_x);
+                             0.0f :
+                             next_vel_x / Math.abs(next_vel_x);
         float direction_y = (next_vel_y <= 0 + EPSILON && next_vel_y >= 0 - EPSILON) ?
                 0.0f :
                 next_vel_y / Math.abs(next_vel_y);

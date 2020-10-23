@@ -2,7 +2,6 @@ package com.jukaio.jumpandrun.components;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 
 import com.jukaio.jumpandrun.Entity;
 import com.jukaio.jumpandrun.InputManager;
@@ -45,7 +44,7 @@ public class InputComponent extends Component
     @Override
     public void pre_update(float p_dt)
     {
-        if (InputManager.is_jump() && m_ground_sensors.m_ground_collisions.size() != 0)
+        if (InputManager.is_jump() && m_ground_sensors.m_collisions.size() != 0)
         {
             m_jump.add_force(m_jump_force);
         }
@@ -53,7 +52,6 @@ public class InputComponent extends Component
         float accel_x = m_kinematic.get_acceleration().m_x.floatValue();
         float accel_y = m_kinematic.get_acceleration().m_x.floatValue();
               accel_x += InputManager.get_horizontal() * m_speed_x;
-              accel_y += InputManager.get_vertical() * m_speed_y;
         m_kinematic.set_acceleration(accel_x,
                                      accel_y);
         

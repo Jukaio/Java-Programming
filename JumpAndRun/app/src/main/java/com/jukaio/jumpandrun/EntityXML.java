@@ -4,13 +4,17 @@ import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.jukaio.jumpandrun.components.BitmapComponent;
+import com.jukaio.jumpandrun.components.CoinComponent;
+import com.jukaio.jumpandrun.components.CoinCountComponent;
 import com.jukaio.jumpandrun.components.ComponentType;
+import com.jukaio.jumpandrun.components.GetHitComponent;
 import com.jukaio.jumpandrun.components.GroundSensorsComponent;
-import com.jukaio.jumpandrun.components.InputComponent;
+import com.jukaio.jumpandrun.components.PlayerControllerComponent;
 import com.jukaio.jumpandrun.components.JumpComponent;
 import com.jukaio.jumpandrun.components.KineticComponent;
 import com.jukaio.jumpandrun.components.RecorderComponent;
 import com.jukaio.jumpandrun.components.RectangleColliderComponent;
+import com.jukaio.jumpandrun.components.SpikeComponent;
 import com.jukaio.jumpandrun.components.WallSensorsComponent;
 import com.jukaio.jumpandrun.components.WorldPhysicsComponent;
 
@@ -45,6 +49,10 @@ public class EntityXML extends Entity
         int h = XML.parse_int(first, "height");
         set_dimensions(w, h);
         
+        float origin_x = XML.parse_float(first, "origin_x");
+        float origin_y = XML.parse_float(first, "origin_y");
+        set_origin(origin_x, origin_y);
+        
         NodeList children = first.getChildNodes();
         for(int i = 0; i < children.getLength(); i++)
         {
@@ -66,14 +74,14 @@ public class EntityXML extends Entity
                             {
                                 default:
                                 case UNKNOWN:
-                                    throw new AssertionError("COMPONENT DOES NOT EXIST:" + component_element.getNodeName().toUpperCase());
+                                    throw new AssertionError("COMPONENT DOES NOT EXIST, IS NOT PART OF ENTITY ENUM OR IS NOT AN ADDED CASE IN THIS FACTORY:" + component_element.getNodeName().toUpperCase());
                                     
                                 case BITMAP:
                                     add_component(new BitmapComponent(this, p_params.m_bitmap));
                                     break;
                                     
-                                case INPUT:
-                                    add_component(new InputComponent(this, component_element));
+                                case PLAYER_CONTROLLER:
+                                    add_component(new PlayerControllerComponent(this, component_element));
                                     break;
                                     
                                 case KINEMATIC:
@@ -101,7 +109,23 @@ public class EntityXML extends Entity
                                     break;
                                     
                                 case RECTANGLE_COLLIDER:
-                                    add_component(new RectangleColliderComponent(this));
+                                    add_component(new RectangleColliderComponent(this, p_params.m_world, component_element));
+                                    break;
+                                    
+                                case COIN:
+                                    add_component(new CoinComponent(this, component_element));
+                                    break;
+                                    
+                                case COIN_COUNT:
+                                    add_component(new CoinCountComponent(this, p_params.m_world, component_element));
+                                    break;
+                                    
+                                case SPIKE_COMPONENT:
+                                    add_component(new SpikeComponent(this, component_element));
+                                    break;
+                                    
+                                case GET_HIT:
+                                    add_component(new GetHitComponent(this, component_element));
                                     break;
                             }
                         }

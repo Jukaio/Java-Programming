@@ -9,6 +9,17 @@ import com.jukaio.jumpandrun.Entity;
 public class BitmapComponent extends Component
 {
     Bitmap m_bitmap = null;
+    private int m_colour = 0xFFFFFFFF;
+
+    public int get_colour()
+    {
+        return m_colour;
+    }
+    
+    public void set_colour(int p_colour)
+    {
+        m_colour = p_colour;
+    }
 
     public BitmapComponent(Entity p_entity, Bitmap p_bitmap)
     {
@@ -50,6 +61,10 @@ public class BitmapComponent extends Component
     @Override
     public void render(Canvas p_canvas, Paint p_paint)
     {
+        int prev_colour = p_paint.getColor();
+        p_paint.setColor(m_colour);
         p_canvas.drawBitmap(m_bitmap, get_entity().get_matrix(), p_paint);
+        p_paint.setColor(prev_colour);
     }
+   
 }

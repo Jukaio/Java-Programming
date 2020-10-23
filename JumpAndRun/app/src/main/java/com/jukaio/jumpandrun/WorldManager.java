@@ -95,15 +95,19 @@ public class WorldManager implements IEntity
             e.start();
     }
     
+
+    
     @Override
     public void update(float p_dt)
     {
+        m_current.m_collisionAABB.check_collisions();
+    
         for(Entity e : m_current.m_entities)
-            e.pre_update(p_dt);
+            if(e.get_active()) e.pre_update(p_dt);
         for(Entity e : m_current.m_entities)
-            e.update(p_dt);
+            if(e.get_active()) e.update(p_dt);
         for(Entity e : m_current.m_entities)
-            e.late_update(p_dt);
+            if(e.get_active()) e.late_update(p_dt);
     }
     
     @Override
@@ -123,6 +127,7 @@ public class WorldManager implements IEntity
         {
             World.TileMap.Layer layer = tile_map.get_layer(i);
             
+            
             switch(layer.get_type())
             {
                 case ERROR:
@@ -130,7 +135,6 @@ public class WorldManager implements IEntity
                     
                 case BACKGROUND:
                 case STATIC:
-                case HUD:
                     for (int y = 0; y < grid.get_dimensions().m_y.intValue(); y++)
                     {
                         for (int x = 0; x < grid.get_dimensions().m_x.intValue(); x++)
@@ -149,22 +153,31 @@ public class WorldManager implements IEntity
                     break;
                 case DYNAMIC:
                     for(Entity e : m_current.m_entities)
-                        e.render(p_canvas, p_paint);
+                        if(e.get_active()) e.render(p_canvas, p_paint);
                     break;
             }
-            
         }
     
+        m_current.m_hud.render(p_canvas, p_paint);
+        
         p_paint.setStyle(Paint.Style.FILL_AND_STROKE);
         p_paint.setColor(Color.RED);
-        for (int i = 0; i < tile_map.line_count_in_collider(); i++)
+        for (int i = 0; i < tile_map.m_collider.m_tiles.length; i++)
         {
-            Line l = tile_map.get_line_from_collider(i);
-            p_canvas.drawLine(l.m_start.x,
-                                     l.m_start.y,
-                                     l.m_end.x,
-                                     l.m_end.y,
-                                     p_paint);
+            if(tile_map.m_collider.m_tiles[i] != null)
+            {
+                for (int j = 0; j < tile_map.m_collider.m_tiles[i].size(); j++)
+                {
+                    Line line = tile_map.m_collider.m_tiles[i].get(j);
+                    if (line != null)
+                        p_canvas.drawLine(line.m_start.x,
+                                          line.m_start.y,
+                                          line.m_end.x,
+                                          line.m_end.y,
+                                          p_paint);
+        
+                }
+            }
         }
     }
     
@@ -177,6 +190,8 @@ public class WorldManager implements IEntity
         if(layer == null)
             return;
         
+        p_tile_map.m_collider.m_tiles = new ArrayList[layer.get_dimensions().m_x.intValue() * layer.get_dimensions().m_y.intValue()];
+        
         final int w = grid.get_tile_size().m_x.intValue();
         final int h = grid.get_tile_size().m_y.intValue();
         
@@ -184,14 +199,16 @@ public class WorldManager implements IEntity
         {
             for(int x = 0; x < layer.get_dimensions().m_x.intValue(); x++)
             {
-                int tile_id = layer.get_tile((y * layer.get_dimensions().m_x.intValue() + x));
+                int layer_index = y * layer.get_dimensions().m_x.intValue() + x;
+                int tile_id = layer.get_tile((layer_index));
                 World.TileSet.Tile tile = p_set.get_tile_at(tile_id);
                 
                 if(tile.m_id != 0)
                 {
+                    p_tile_map.m_collider.m_tiles[layer_index] = new ArrayList<>();
                     int flag = tile.m_flag;
-                    int first_index = tile.m_flag & World.TileMap.StaticCollider.START_POINT_IDX;
-
+                    int first_index = tile.m_flag & World.TileMap.CollisionFlags.START_POINT_IDX;
+                    
                     ArrayList<Point> points = new ArrayList<>();
                     for(int i = 0; i < 4; i++)
                     {
@@ -199,10 +216,10 @@ public class WorldManager implements IEntity
                         final int index = flag & (1 << (wrapped_index + 2));
                         switch (index)
                         {
-                            case(World.TileMap.StaticCollider.TOP_LEFT):     points.add(new Point(x * w, y * h));             break;
-                            case(World.TileMap.StaticCollider.TOP_RIGHT):    points.add(new Point((x * w) + w, y * h));       break;
-                            case(World.TileMap.StaticCollider.BOTTOM_RIGHT): points.add(new Point((x * w) + w, (y * h) + h)); break;
-                            case(World.TileMap.StaticCollider.BOTTOM_LEFT):  points.add(new Point(x * w, (y * h) + h));       break;
+                            case(World.TileMap.CollisionFlags.TOP_LEFT):     points.add(new Point(x * w, y * h));             break;
+                            case(World.TileMap.CollisionFlags.TOP_RIGHT):    points.add(new Point((x * w) + w, y * h));       break;
+                            case(World.TileMap.CollisionFlags.BOTTOM_RIGHT): points.add(new Point((x * w) + w, (y * h) + h)); break;
+                            case(World.TileMap.CollisionFlags.BOTTOM_LEFT):  points.add(new Point(x * w, (y * h) + h));       break;
                         }
                     }
                     Point prev_p = null;
@@ -210,7 +227,8 @@ public class WorldManager implements IEntity
                     {
                         if(prev_p != null)
                         {
-                            p_tile_map.add_line_to_collider(new Line(prev_p.x, prev_p.y, p.x, p.y));
+                            p_tile_map.m_collider.m_tiles[layer_index].add(new Line(prev_p.x, prev_p.y, p.x, p.y));
+                            //p_tile_map.add_line_to_collider(new Line(prev_p.x, prev_p.y, p.x, p.y));
                         }
                         prev_p = p;
                     }

@@ -4,4 +4,6 @@ public enum EntityType
 {
     UNKNOWN,
     PLAYER,
+    COLLECT,
+    LETHAL
 }

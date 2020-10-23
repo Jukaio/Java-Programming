@@ -3,11 +3,18 @@ package com.jukaio.jumpandrun;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
 {
     private Game m_game;
+    
+    private Gamepad m_gamepad = new Gamepad();
+    private Touch m_touch = new Touch();
     
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -15,8 +22,13 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         m_game = findViewById(R.id.game);
-        InputManager controls = new TouchController(findViewById(R.id.touchControl));
-        m_game.set_controls(controls);
+        
+        
+        m_touch.set_game(m_game);
+        
+        m_game.add_controls(new TouchController(findViewById(R.id.touchControl)));
+        m_game.add_controls(m_gamepad);
+        m_game.add_controls(m_touch);
     }
 
     @Override
@@ -32,6 +44,28 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         m_game.onResume();
     }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event)
+    {
+        m_touch.onTouchEvent(event);
+        return true;
+    }
+    
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        m_gamepad.onKeyDown(keyCode, event);
+        return false;
+    }
+    
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event)
+    {
+        m_gamepad.onKeyUp(keyCode, event);
+        return false;
+    }
+    
 
     @Override
     public void onWindowFocusChanged(boolean hasWindowFocus) {

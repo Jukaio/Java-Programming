@@ -1,4 +1,4 @@
-package com.jukaio.spaceshooter;
+package com.jukaio.jumpandrun;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -6,11 +6,13 @@ import android.content.res.AssetManager;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 
+import com.jukaio.jumpandrun.SoundID;
+
 import java.io.IOException;
 
 public class Jukebox
 {
-    SoundPool m_sound_pool = null;
+    private static SoundPool m_sound_pool = null;
     private static final int MAX_STREAMS = 5;
     public static final float MAX_VOLUME = 1.0f;
     private static final int PRIORITY = 0;
@@ -32,8 +34,7 @@ public class Jukebox
             @Override
             public void onLoadComplete(SoundPool p_soundPool, int p_i, int p_i1)
             {
-                if(p_i == Sound_ID.GAME_START)
-                    play(p_i, MAX_VOLUME, 0);
+
             }
         });
     }
@@ -55,7 +56,7 @@ public class Jukebox
         return to_return;
     }
     
-    int play(final int p_id, float p_volume, int p_loop)
+    public static int play(final int p_id, float p_volume, int p_loop)
     {
         if(p_id >= 0)
         {
@@ -69,7 +70,7 @@ public class Jukebox
         return -1;
     }
     
-    void stop(int p_stream_id)
+    public static void stop(int p_stream_id)
     {
         m_sound_pool.stop(p_stream_id);
     }

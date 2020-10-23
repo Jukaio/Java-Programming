@@ -80,6 +80,12 @@ public class Entity extends Transform implements IEntity
     
     }
     
+    final public void on_collision(Entity p_other)
+    {
+        for(Component c : m_components)
+            c.on_collision(p_other);
+    }
+    
     final public void pre_update(float p_dt)
     {
         for(Component c : m_components)

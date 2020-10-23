@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.util.Log;
 
 import com.jukaio.jumpandrun.Entity;
 import com.jukaio.jumpandrun.World;
@@ -26,12 +27,15 @@ public class WorldPhysicsComponent extends Component
     float m_previous_x = 0.0f;
     float m_previous_y = 0.0f;
     float m_gravity = 0.0f;
+    int m_detection_range_x = 0;
+    int m_detection_range_y = 0;
 
     public WorldPhysicsComponent(Entity p_entity, World p_world, Element p_data)
     {
         super(p_entity);
         m_gravity = XML.parse_float(p_data, "gravity");
-        
+        m_detection_range_x = XML.parse_int(p_data, "detection_range_x");
+        m_detection_range_y = XML.parse_int(p_data, "detection_range_y");
         m_tile_map = p_world.m_tile_map;
     }
     
@@ -83,32 +87,29 @@ public class WorldPhysicsComponent extends Component
              get_entity().set_scale(Math.abs(flip_scale_x) / flip_scale_x, 1);
          }
     
-        get_segment_collisions(m_ground_sensors.m_ground_collisions,
-                               m_tile_map,
-                               m_ground_sensors);
-        get_segment_collisions(m_wall_sensors.m_collisions,
-                               m_tile_map,
-                               m_wall_sensors);
+        get_ground_collisions(m_ground_sensors.m_collisions);
+        get_wall_collisions(m_wall_sensors.m_collisions);
+        
         if (m_wall_sensors.m_collisions.size() == 0)
         {
-            if (m_ground_sensors.m_ground_collisions.size() != 0 && m_ground_sensors.m_active)
+            if (m_ground_sensors.m_collisions.size() != 0 && m_ground_sensors.m_active)
                 lerp_to_collision_lines();
         }
         else
         {
-            if(m_ground_sensors.m_ground_collisions.size() != 0)
+            Line closest_wall = closest_line(x, y, m_wall_sensors.m_collisions);
+            float difference = x - closest_wall.m_start.x;
+            if(m_ground_sensors.m_collisions.size() != 0)
             {
-                Line closest_wall = closest_line(x, y, m_wall_sensors.m_collisions);
-                float difference = x - closest_wall.m_start.x;
-                get_entity().set_position(m_previous_x + (difference * 0.5f),
-                                          m_previous_y);
+                get_entity().set_position(m_previous_x + (difference * 0.25f),
+                                          y);
             }
             else
-                get_entity().set_position(m_previous_x, m_previous_y + m_gravity);
+                get_entity().set_position(m_previous_x + (difference * 0.25f), m_previous_y + m_gravity);
             m_kinematic.set_velocity(0, 0);
         }
     }
-    
+    ArrayList<Line> m_checked = new ArrayList<>();
     @Override
     public void render(Canvas p_canvas, Paint p_paint)
     {
@@ -117,69 +118,101 @@ public class WorldPhysicsComponent extends Component
         p_paint.setStrokeWidth(5.0f);
         //p_canvas.drawCircle(to_draw_circle.x, to_draw_circle.y, 2.0f, p_paint);
         
-        for(Line line : m_wall_sensors.m_collisions)
+
+        for(Line line : m_checked)
         {
-            //p_canvas.drawLine(line.m_start.x, line.m_start.y, line.m_end.x, line.m_end.y, p_paint);
+            p_canvas.drawLine(line.m_start.x, line.m_start.y, line.m_end.x, line.m_end.y, p_paint);
         }
         
         
         p_paint.setStrokeWidth(1.0f);
         p_paint.setColor(color);
-    }
-    
-    private void handle_wall_collisions()
-    {
-        Line collision = m_wall_sensors.m_collisions.get(0);
-        float mid_x = (collision.m_start.x + collision.m_end.x) * 0.5f;
-        float mid_y = (collision.m_start.x + collision.m_end.x) * 0.5f;
         
-        float x = get_entity().get_position().m_x.floatValue();
-        float y = get_entity().get_position().m_y.floatValue();
+        
     }
     
-    private static void get_segment_collisions(ArrayList<Line> out_collisions,
-                                               World.TileMap p_tile_map,
-                                               GroundSensorsComponent p_sensor)
+    private void get_ground_collisions(ArrayList<Line> out_collisions)
     {
+        m_checked.clear();
         out_collisions.clear();
+        int map_width = m_tile_map.get_grid().get_dimensions().m_x.intValue();
+        int map_height = m_tile_map.get_grid().get_dimensions().m_y.intValue();
     
-        for (int i = 0; i < p_tile_map.line_count_in_collider(); i++)
+        int x = get_entity().get_position().m_x.intValue() / m_tile_map.get_grid().get_tile_size().m_x.intValue();
+        int y = get_entity().get_position().m_y.intValue() / m_tile_map.get_grid().get_tile_size().m_y.intValue();
+
+        for (int index_y = Math.max(y - m_detection_range_y,
+                                    0); index_y < Math.min(y + m_detection_range_y,
+                                                           map_height); index_y++)
         {
-            Line line = p_tile_map.get_line_from_collider(i);
-            boolean left_collided = CollisionDetection.LineLine(p_sensor.m_ground_left,
-                                                                line);
-            boolean right_collided = CollisionDetection.LineLine(p_sensor.m_ground_right,
-                                                                 line);
-            boolean center_collided = CollisionDetection.LineLine(p_sensor.m_ground_center,
-                                                                  line);
-    
-            // TODO: Handle wall colision correctly - Wall has a fucking normal of (abs(1) | 0)
-            if (left_collided ||
-                center_collided ||
-                right_collided)
+            for (int index_x = Math.max(x - m_detection_range_x,
+                                        0); index_x < Math.min(x + m_detection_range_x,
+                                                               map_width); index_x++)
             {
-                out_collisions.add(line);
-            }
-        }
-    }
-    
-    private static void get_segment_collisions(ArrayList<Line> out_collisions,
-                                               World.TileMap p_tile_map,
-                                               WallSensorsComponent p_sensor)
-        {
-            out_collisions.clear();
-        
-            for (int i = 0; i < p_tile_map.line_count_in_collider(); i++)
-            {
-                Line line = p_tile_map.get_line_from_collider(i);
-                boolean collided = CollisionDetection.LineLine(p_sensor.m_wall,
-                                                                    line);
-                if (collided)
+                int index = (index_y * map_width) + index_x;
+                if (m_tile_map.m_collider.m_tiles[index] != null)
                 {
-                    out_collisions.add(line);
+                    for (Line line : m_tile_map.m_collider.m_tiles[index])
+                    {
+                        boolean left_collided = CollisionDetection.LineLine(m_ground_sensors.m_ground_left,
+                                                                            line);
+                        boolean right_collided = CollisionDetection.LineLine(m_ground_sensors.m_ground_right,
+                                                                             line);
+                        boolean center_collided = CollisionDetection.LineLine(m_ground_sensors.m_ground_center,
+                                                                              line);
+                        m_checked.add(line);
+                        // TODO: Handle wall colision correctly - Wall has a fucking normal of (abs(1) | 0)
+                        if (left_collided ||
+                                center_collided ||
+                                right_collided)
+                        {
+                            out_collisions.add(line);
+                        }
+                    }
                 }
             }
         }
+    }
+    
+    private void get_wall_collisions(ArrayList<Line> out_collisions)
+    {
+        out_collisions.clear();
+        int map_width = m_tile_map.get_grid().get_dimensions().m_x.intValue();
+        int map_height = m_tile_map.get_grid().get_dimensions().m_y.intValue();
+    
+        int x = get_entity().get_position().m_x.intValue() / m_tile_map.get_grid().get_tile_size().m_x.intValue();
+        int y = get_entity().get_position().m_y.intValue() / m_tile_map.get_grid().get_tile_size().m_y.intValue();
+    
+    
+        for (int index_y = Math.max(y - m_detection_range_y,
+                                    0); index_y < Math.min(y + m_detection_range_y,
+                                                           map_height); index_y++)
+        {
+            for (int index_x = Math.max(x - m_detection_range_x,
+                                        0); index_x < Math.min(x + m_detection_range_x,
+                                                               map_width); index_x++)
+            {
+                int index = (index_y * map_width) + index_x;
+                if (m_tile_map.m_collider.m_tiles[index] != null)
+                {
+                    for (Line line : m_tile_map.m_collider.m_tiles[index])
+                    {
+    
+                        boolean wall_collided = CollisionDetection.LineLine(m_wall_sensors.m_wall,
+                                                                            line);
+                        boolean ceiling_collided = CollisionDetection.LineLine(m_wall_sensors.m_ceiling,
+                                                                               line);
+                        m_checked.add(line);
+                        // TODO: Handle wall colision correctly - Wall has a fucking normal of (abs(1) | 0)
+                        if (wall_collided || ceiling_collided)
+                        {
+                            out_collisions.add(line);
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     Point to_draw_circle = new Point(20, 20);
     private void lerp_to_collision_lines()
@@ -188,7 +221,7 @@ public class WorldPhysicsComponent extends Component
         // Find closest line to player
         Line collision_line = closest_line(m_previous_x,
                                            m_previous_y,
-                                           m_ground_sensors.m_ground_collisions);
+                                           m_ground_sensors.m_collisions);
     
         // Rearrange line endings
         float line_x = collision_line.m_end.x - collision_line.m_start.x;

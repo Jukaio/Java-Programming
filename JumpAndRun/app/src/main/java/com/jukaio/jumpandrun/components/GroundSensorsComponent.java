@@ -26,7 +26,7 @@ public class GroundSensorsComponent extends Component
     float m_offset_x = 0.0f;
     float m_offset_y = 0.0f;
     
-    public ArrayList<Line> m_ground_collisions = new ArrayList<>();
+    public ArrayList<Line> m_collisions = new ArrayList<>();
     
     KineticComponent m_kinematic = null;
     

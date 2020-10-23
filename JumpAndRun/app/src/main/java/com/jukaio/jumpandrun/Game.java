@@ -4,11 +4,16 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+
+import java.util.ArrayList;
 
 public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callback
 {
@@ -24,12 +29,14 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     private volatile boolean    m_running           = false;
     private Renderer            m_renderer          = null;
     
-
-    private InputManager m_input_manager = null;
+    
+    private InputManager m_input_manager = new InputManager();
     private WorldManager m_world_manager = new WorldManager();
+    private Jukebox m_jukebox = new Jukebox();
 
     int m_width = 0;
     int m_height = 0;
+    int m_zoom = 0;
 
     public Game(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -60,17 +67,13 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     {
         //Entity.GAME = this;
 
-
-        create_shared_components();
-        m_world_manager.create_world("level_two.xml", getContext());
-
-    }
-
-    private void create_shared_components()
-    {
         create_renderer();
+        SoundID.LEVEL_ONE = m_jukebox.load_sound(getContext(), "SpaceBG.ogg");
+        m_world_manager.create_world("level_two.xml", getContext());
+        //Jukebox.play(SoundID.LEVEL_ONE, Jukebox.MAX_VOLUME, 0);
+
     }
-    
+
     private boolean lock_canvas(Renderer p_renderer)
     {
         if(!p_renderer.m_holder.getSurface().isValid())
@@ -86,14 +89,14 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
         m_renderer.m_holder = getHolder();
         m_renderer.m_holder.addCallback(this);
         m_renderer.m_paint = new Paint();
-        int zoom = getResources().getInteger(R.integer.zoom);
-        m_renderer.m_holder.setFixedSize(getResources().getInteger(R.integer.screen_width) / zoom,
-                getResources().getInteger(R.integer.screen_height) / zoom);
+        m_zoom = getResources().getInteger(R.integer.zoom);
+        m_renderer.m_holder.setFixedSize(getResources().getInteger(R.integer.screen_width) / m_zoom,
+                getResources().getInteger(R.integer.screen_height) / m_zoom);
     }
     
-    public void set_controls(InputManager p_controls)
+    public void add_controls(InputDevice p_controls)
     {
-        m_input_manager = p_controls;
+        m_input_manager.add_device(p_controls);
     }
 
     @Override
@@ -111,7 +114,6 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
             time_point = System.nanoTime();
             
             update((float)(delta_time * ns));
-            Log.d("DELTA", Double.toString(delta_time * ns));
             render();
         }
     }
@@ -212,6 +214,6 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     public void surfaceDestroyed(@NonNull final SurfaceHolder p_surfaceHolder)
     {
         Log.d(TAG, "surfaceDestroyed");
-    
     }
+    
 }

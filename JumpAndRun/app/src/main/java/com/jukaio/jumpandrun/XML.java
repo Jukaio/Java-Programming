@@ -47,6 +47,11 @@ public class XML
         return Integer.parseInt(p_node.getAttributes().getNamedItem(p_item_name).getNodeValue());
     }
     
+    public static float parse_float(Node p_node, String p_item_name)
+    {
+        return Float.parseFloat(p_node.getAttributes().getNamedItem(p_item_name).getNodeValue());
+    }
+    
     public static float parse_float(Element p_element, String p_item_name)
     {
         return Float.parseFloat(p_element.getAttribute(p_item_name));
