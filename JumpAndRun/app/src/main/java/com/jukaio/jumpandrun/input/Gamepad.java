@@ -1,9 +1,8 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.input;
 
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.View;
+
+import com.jukaio.jumpandrun.MainActivity;
 
 public class Gamepad extends InputDevice
 {

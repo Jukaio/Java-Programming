@@ -1,6 +1,8 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.input;
 
 import android.view.MotionEvent;
+
+import com.jukaio.jumpandrun.Game;
 
 public class Touch extends InputDevice
 {
@@ -104,9 +106,9 @@ public class Touch extends InputDevice
     private void set_inputs(float p_point_x, float p_point_y,
                                    boolean p_set_to)
     {
-        if (p_point_y > (m_game.m_height * m_game.m_zoom) * 0.25f)
+        if (p_point_y > (m_game.m_height) * 0.25f)
         {
-            if (p_point_x > (m_game.m_width * m_game.m_zoom) * 0.5f)
+            if (p_point_x > (m_game.m_width) * 0.5f)
                 m_move_right = p_set_to;
             else
                 m_move_left = p_set_to;

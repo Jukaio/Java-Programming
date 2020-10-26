@@ -1,8 +1,9 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.input;
 
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.jukaio.jumpandrun.R;
 
 public class TouchController extends InputDevice implements View.OnTouchListener
 {

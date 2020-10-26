@@ -1,8 +1,9 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.entity;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 
+import com.jukaio.jumpandrun.XML;
 import com.jukaio.jumpandrun.components.BitmapComponent;
 import com.jukaio.jumpandrun.components.CoinComponent;
 import com.jukaio.jumpandrun.components.ResourceCountComponent;
@@ -18,6 +19,8 @@ import com.jukaio.jumpandrun.components.SpikeComponent;
 import com.jukaio.jumpandrun.components.WallSensorsComponent;
 import com.jukaio.jumpandrun.components.WorldPhysicsComponent;
 import com.jukaio.jumpandrun.components.WorldSelectorComponent;
+import com.jukaio.jumpandrun.world.World;
+import com.jukaio.jumpandrun.world.WorldManager;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -28,13 +31,13 @@ public class EntityXML extends Entity
 {
     public static class Params
     {
-        WorldManager m_world_manager = null;
-        World m_world = null;
-        EntityType m_type = null;
-        int m_x = 0;
-        int m_y = 0;
-        Bitmap m_bitmap = null;
-        String m_source = null;
+        public WorldManager m_world_manager = null;
+        public World m_world = null;
+        public EntityType m_type = null;
+        public int m_x = 0;
+        public int m_y = 0;
+        public Bitmap m_bitmap = null;
+        public String m_source = null;
     }
 
     public EntityXML(boolean p_active, Params p_params, Context p_context)

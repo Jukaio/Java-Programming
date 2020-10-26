@@ -1,4 +1,4 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.input;
 
 import java.util.ArrayList;
 

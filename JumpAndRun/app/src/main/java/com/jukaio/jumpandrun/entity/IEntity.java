@@ -1,6 +1,8 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.entity;
 
 import android.graphics.Paint;
+
+import com.jukaio.jumpandrun.Viewport;
 
 public interface IEntity
 {

@@ -1,4 +1,4 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.entity;
 
 public enum EntityType
 {

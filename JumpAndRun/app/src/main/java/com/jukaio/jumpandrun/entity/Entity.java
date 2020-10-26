@@ -1,7 +1,8 @@
-package com.jukaio.jumpandrun;
+package com.jukaio.jumpandrun.entity;
 
 import android.graphics.Paint;
 
+import com.jukaio.jumpandrun.Viewport;
 import com.jukaio.jumpandrun.components.Component;
 import com.jukaio.jumpandrun.components.ComponentType;
 
