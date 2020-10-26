@@ -24,8 +24,8 @@ public class Formulas
     public static float angle(float p_x, float p_y)
     {
         return (float) (R2D * Math.acos(((p_x * base_x) + (p_y * base_y)) /
-                          (float) (Math.sqrt(Math.pow(p_x, 2.0) + Math.pow(p_y, 2.0))) *
-                          (float) (Math.sqrt(Math.pow(base_x, 2.0) + Math.pow(base_y, 2.0)))));
+               (float) (Math.sqrt(Math.pow(p_x, 2.0) + Math.pow(p_y, 2.0))) *
+               (float) (Math.sqrt(Math.pow(base_x, 2.0) + Math.pow(base_y, 2.0)))));
     }
     
     public static float lerp(float a, float b, float fraction)

@@ -1,10 +1,9 @@
 package com.jukaio.jumpandrun.components;
 
-import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.jukaio.jumpandrun.Entity;
-import com.jukaio.jumpandrun.XML;
+import com.jukaio.jumpandrun.entity.Entity;
+import com.jukaio.jumpandrun.Viewport;
 
 import org.w3c.dom.Element;
 
@@ -47,7 +46,13 @@ public class SpikeComponent extends Component
     }
     
     @Override
-    public void render(Canvas p_canvas, Paint p_paint)
+    public void render(Viewport p_viewport, Paint p_paint)
+    {
+    
+    }
+    
+    @Override
+    protected void destroy()
     {
     
     }

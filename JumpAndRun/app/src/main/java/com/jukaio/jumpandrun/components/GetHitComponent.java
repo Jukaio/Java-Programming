@@ -1,23 +1,21 @@
 package com.jukaio.jumpandrun.components;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-import com.jukaio.jumpandrun.Entity;
+import com.jukaio.jumpandrun.entity.Entity;
+import com.jukaio.jumpandrun.Viewport;
 import com.jukaio.jumpandrun.XML;
 
 import org.w3c.dom.Element;
 
 public class GetHitComponent extends Component
 {
-    float m_recovery = 0.0f;
-    float m_recovery_timer = 0.0f;
-    float m_flick_rate = 0.0f;
-    float m_flick_timer = 0.0f;
-    
-    private BitmapComponent m_bitmap = null;
+    private float               m_recovery          = 0.0f;
+    private float               m_recovery_timer    = 0.0f;
+    private float               m_flick_rate        = 0.0f;
+    private float               m_flick_timer       = 0.0f;
+    private BitmapComponent     m_bitmap            = null;
 
     public GetHitComponent(Entity p_entity, Element p_data)
     {
@@ -78,9 +76,15 @@ public class GetHitComponent extends Component
     }
     
     @Override
-    public void render(Canvas p_canvas, Paint p_paint)
+    public void render(Viewport p_viewport, Paint p_paint)
     {
     
+    }
+    
+    @Override
+    protected void destroy()
+    {
+        m_bitmap = null;
     }
     
     @Override

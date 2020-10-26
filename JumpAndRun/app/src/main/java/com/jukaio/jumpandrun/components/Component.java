@@ -1,9 +1,9 @@
 package com.jukaio.jumpandrun.components;
 
-import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.jukaio.jumpandrun.Entity;
+import com.jukaio.jumpandrun.entity.Entity;
+import com.jukaio.jumpandrun.Viewport;
 
 public abstract class Component
 {
@@ -33,10 +33,13 @@ public abstract class Component
     abstract public void pre_update(float p_dt);
     abstract public void update(float p_dt);
     abstract public void late_update(float p_dt);
-    abstract public void render(Canvas p_canvas, Paint p_paint);
+    abstract public void render(Viewport p_viewport, Paint p_paint);
     
-    public void destroy()
+    final public void clean()
     {
+        destroy();
         m_entity = null;
     }
+    
+    abstract protected void destroy();
 }

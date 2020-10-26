@@ -1,15 +1,15 @@
 package com.jukaio.jumpandrun.components;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.jukaio.jumpandrun.Entity;
+import com.jukaio.jumpandrun.entity.Entity;
+import com.jukaio.jumpandrun.Viewport;
 
 public class BitmapComponent extends Component
 {
-    Bitmap m_bitmap = null;
-    private int m_colour = 0xFFFFFFFF;
+    private Bitmap  m_bitmap    = null;
+    private int     m_colour    = 0xFFFFFFFF;
 
     public int get_colour()
     {
@@ -59,12 +59,18 @@ public class BitmapComponent extends Component
     }
     
     @Override
-    public void render(Canvas p_canvas, Paint p_paint)
+    public void render(Viewport p_viewport, Paint p_paint)
     {
         int prev_colour = p_paint.getColor();
         p_paint.setColor(m_colour);
-        p_canvas.drawBitmap(m_bitmap, get_entity().get_matrix(), p_paint);
+        p_viewport.draw_bitmap(m_bitmap, get_entity().get_matrix(), p_paint);
         p_paint.setColor(prev_colour);
     }
-   
+    
+    @Override
+    protected void destroy()
+    {
+        m_bitmap = null;
+    }
+    
 }

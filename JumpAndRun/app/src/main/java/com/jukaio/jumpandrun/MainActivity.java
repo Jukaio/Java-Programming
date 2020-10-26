@@ -7,7 +7,9 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
+import com.jukaio.jumpandrun.input.Gamepad;
+import com.jukaio.jumpandrun.input.Touch;
+import com.jukaio.jumpandrun.input.TouchController;
 
 public class MainActivity extends AppCompatActivity
 {

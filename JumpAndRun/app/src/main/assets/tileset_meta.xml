@@ -134,7 +134,7 @@
  </tile>
  <tile id="23" type="Ground">
   <properties>
-   <property name="first_corner" type="int" value="0"/>
+   <property name="first_corner" type="int" value="1"/>
    <property name="point_flags" type="int" value="15"/>
   </properties>
  </tile>

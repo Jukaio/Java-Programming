@@ -2,9 +2,9 @@
 <map version="1.2" tiledversion="1.3.5" orientation="orthogonal" renderorder="left-up" width="160" height="18" tilewidth="16" tileheight="16" infinite="0" backgroundcolor="#002c00" nextlayerid="7" nextobjectid="1">
  <editorsettings>
   <chunksize width="60" height="40"/>
-  <export target="levels/2.xml" format="tmx"/>
+  <export target="2.xml" format="tmx"/>
  </editorsettings>
- <tileset firstgid="1" source="tileset_meta.tsx"/>
+ <tileset firstgid="1" source="tileset_meta.xml"/>
  <layer id="1" name="Background" width="160" height="18">
   <properties>
    <property name="LayerType" type="int" value="0"/>

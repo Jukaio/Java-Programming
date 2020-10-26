@@ -1,21 +1,20 @@
 package com.jukaio.jumpandrun.components;
 
-import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.jukaio.jumpandrun.Entity;
+import com.jukaio.jumpandrun.entity.Entity;
+import com.jukaio.jumpandrun.Viewport;
 import com.jukaio.jumpandrun.XML;
-import com.jukaio.jumpandrun.extramath.Formulas;
 import com.jukaio.jumpandrun.extramath.Vector2;
 
 import org.w3c.dom.Element;
 
 public class KineticComponent extends Component
 {
-    private Vector2 m_acceleration = new Vector2();
-    private Vector2 m_velocity = new Vector2();
-    private Vector2 m_maximum_speed = new Vector2();
-    private float m_damp = 0.0f;
+    private Vector2     m_acceleration  = new Vector2();
+    private Vector2     m_velocity      = new Vector2();
+    private Vector2     m_maximum_speed = new Vector2();
+    private float       m_damp          = 0.0f;
     
     public Vector2 get_max_speed()
     {
@@ -56,9 +55,12 @@ public class KineticComponent extends Component
         m_velocity.m_x = 0.0f;
         m_velocity.m_y = 0.0f;
         
-        m_maximum_speed.m_x = XML.parse_float(p_data, "max_speed_x");
-        m_maximum_speed.m_y = XML.parse_float(p_data, "max_speed_y");
-        m_damp = XML.parse_float(p_data, "damp");
+        m_maximum_speed.m_x = XML.parse_float(p_data,
+                                              "max_speed_x");
+        m_maximum_speed.m_y = XML.parse_float(p_data,
+                                              "max_speed_y");
+        m_damp = XML.parse_float(p_data,
+                                 "damp");
     }
     
     @Override
@@ -90,16 +92,25 @@ public class KineticComponent extends Component
     public void late_update(float p_dt)
     {
         update_velocity(this);
-
+    
     }
     
     @Override
-    public void render(Canvas p_canvas, Paint p_paint)
+    public void render(Viewport p_viewport, Paint p_paint)
     {
     
     }
     
+    @Override
+    protected void destroy()
+    {
+        m_acceleration  = null;
+        m_velocity      = null;
+        m_maximum_speed = null;
+    }
+    
     private static final double EPSILON = 0.0001;
+    
     private static void update_velocity(KineticComponent p_kinematic)
     {
         float accel_x = p_kinematic.get_acceleration().m_x.floatValue();
@@ -118,19 +129,29 @@ public class KineticComponent extends Component
         float next_vel_y = current_vel_y + accel_y;
     
         float direction_x = (next_vel_x <= 0 + EPSILON && next_vel_x >= 0 - EPSILON) ?
-                             0.0f :
-                             next_vel_x / Math.abs(next_vel_x);
+                0.0f :
+                next_vel_x / Math.abs(next_vel_x);
         float direction_y = (next_vel_y <= 0 + EPSILON && next_vel_y >= 0 - EPSILON) ?
                 0.0f :
                 next_vel_y / Math.abs(next_vel_y);
     
         next_vel_x = next_vel_x / (1 + p_kinematic.m_damp);
         next_vel_y = next_vel_y / (1 + p_kinematic.m_damp);
-        
+    
         to_apply_x = (Math.abs(next_vel_x) > max_speed_x) ? direction_x * max_speed_x : next_vel_x;
         to_apply_y = (Math.abs(next_vel_y) > max_speed_y) ? direction_y * max_speed_y : next_vel_y;
     
-        
+        if (to_apply_x < 0.001 &&
+                to_apply_x > -0.001)
+        {
+            to_apply_x = 0;
+        }
+        if (to_apply_y < 0.001 &&
+                to_apply_y > -0.001)
+        {
+            to_apply_y = 0;
+        }
+    
     
         p_kinematic.set_velocity(to_apply_x,
                                  to_apply_y);

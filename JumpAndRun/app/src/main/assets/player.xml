@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <player name="player" width="16" height="16" origin_x="0.5" origin_y="0.5">
  <Components>
+  <World_selector/>
   <Bitmap/>
   <Kinematic max_speed_x="2.0" max_speed_y="40.0" damp="0.1"/>
-  <Ground_sensors offset_x="5" offset_y="1"/>
+  <Ground_sensors offset_x="2" offset_y="3"/>
   <Wall_sensors offset_x="1" offset_y="4"/>
-  <Rectangle_collider offset_x="0" offset_y="0"/>
+  <Rectangle_collider offset_x="0" offset_y="0" shrink_x="2" shrink_y="2"/>
   <Get_hit recovery="1.0" flicker="0.1"/>
   <Jump/>
-  <Coin_count x="20" y="40" size="20" align="LEFT" base_text="COINS LEFT: "/>
-  <Player_controller acceleration_x="0.2" acceleration_y="0.0" jump_force="10.2"/>
+  <Resource_count x="80" y="60" size="40" align="LEFT" base_text_coins="COINS LEFT: " base_text_health="HEALTH: " max_lives="3"/>
   <Recorder/>
+  <Player_controller acceleration_x="0.2" acceleration_y="0.0" jump_force="11.2" jump_cooldown="0.2"/>
   <World_physics gravity="3.4" detection_range_x="2" detection_range_y="2"/>
  </Components>
 </player>

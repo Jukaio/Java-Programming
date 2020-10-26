@@ -1,16 +1,15 @@
 package com.jukaio.jumpandrun.components;
 
-import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 
-import com.jukaio.jumpandrun.Entity;
+import com.jukaio.jumpandrun.entity.Entity;
+import com.jukaio.jumpandrun.Viewport;
 
 public class JumpComponent extends Component
 {
-    private KineticComponent m_kinematic = null;
-    private GroundSensorsComponent m_ground_sensors = null;
-    private float m_current_force = 0.0f;
+    private KineticComponent        m_kinematic         = null;
+    private GroundSensorsComponent  m_ground_sensors    = null;
+    private float                   m_current_force     = 0.0f;
 
     public void add_force(float p_force)
     {
@@ -64,8 +63,15 @@ public class JumpComponent extends Component
     }
     
     @Override
-    public void render(Canvas p_canvas, Paint p_paint)
+    public void render(Viewport p_viewport, Paint p_paint)
     {
     
+    }
+    
+    @Override
+    protected void destroy()
+    {
+        m_kinematic         = null;
+        m_ground_sensors    = null;
     }
 }

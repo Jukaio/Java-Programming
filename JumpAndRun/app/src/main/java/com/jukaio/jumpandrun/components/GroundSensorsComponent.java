@@ -1,11 +1,12 @@
 package com.jukaio.jumpandrun.components;
 
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-import com.jukaio.jumpandrun.Entity;
-import com.jukaio.jumpandrun.World;
+import com.jukaio.jumpandrun.entity.Entity;
+import com.jukaio.jumpandrun.Game;
+import com.jukaio.jumpandrun.Viewport;
+import com.jukaio.jumpandrun.world.World;
 import com.jukaio.jumpandrun.XML;
 import com.jukaio.jumpandrun.extramath.Formulas;
 import com.jukaio.jumpandrun.extramath.Line;
@@ -16,15 +17,14 @@ import java.util.ArrayList;
 
 public class GroundSensorsComponent extends Component
 {
-    public boolean m_active = true;
-    public Line m_ground_left = new Line();
-    public Line m_ground_center = new Line();
-    public Line m_ground_right = new Line();
-    
-    float m_width = 0.0f;
-    float m_height = 0.0f;
-    float m_offset_x = 0.0f;
-    float m_offset_y = 0.0f;
+    public boolean  m_active        = true;
+    public Line     m_ground_left   = new Line();
+    public Line     m_ground_center = new Line();
+    public Line     m_ground_right  = new Line();
+    private float   m_width         = 0.0f;
+    private float   m_height        = 0.0f;
+    private float   m_offset_x      = 0.0f;
+    private float   m_offset_y      = 0.0f;
     
     public ArrayList<Line> m_collisions = new ArrayList<>();
     
@@ -72,35 +72,31 @@ public class GroundSensorsComponent extends Component
     }
     
     @Override
-    public void render(Canvas p_canvas, Paint p_paint)
+    public void render(Viewport p_viewport, Paint p_paint)
     {
-        final boolean DEBUG = true;
-        
-        if (DEBUG && m_active)
+        if(Game.DEBUG_ON)
         {
             int prev_color = p_paint.getColor();
     
             p_paint.setColor(Color.YELLOW);
     
-            p_canvas.drawLine(m_ground_left.m_start.x,
-                              m_ground_left.m_start.y,
-                              m_ground_left.m_end.x,
-                              m_ground_left.m_end.y,
-                              p_paint);
-            p_canvas.drawLine(m_ground_right.m_start.x,
-                              m_ground_right.m_start.y,
-                              m_ground_right.m_end.x,
-                              m_ground_right.m_end.y,
-                              p_paint);
-    
-            p_canvas.drawLine(m_ground_center.m_start.x,
-                              m_ground_center.m_start.y,
-                              m_ground_center.m_end.x,
-                              m_ground_center.m_end.y,
-                              p_paint);
+            p_viewport.draw_line(m_ground_left,
+                                p_paint);
+            p_viewport.draw_line(m_ground_right,
+                                p_paint);
+            p_viewport.draw_line(m_ground_center,
+                                p_paint);
     
             p_paint.setColor(prev_color);
         }
+    }
+    
+    @Override
+    protected void destroy()
+    {
+        m_ground_left   = null;
+        m_ground_center = null;
+        m_ground_right  = null;
     }
     
     public static void update_position(GroundSensorsComponent p_sensor)

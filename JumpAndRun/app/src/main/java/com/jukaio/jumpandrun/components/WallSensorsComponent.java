@@ -1,10 +1,11 @@
 package com.jukaio.jumpandrun.components;
 
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
-import com.jukaio.jumpandrun.Entity;
+import com.jukaio.jumpandrun.entity.Entity;
+import com.jukaio.jumpandrun.Game;
+import com.jukaio.jumpandrun.Viewport;
 import com.jukaio.jumpandrun.XML;
 import com.jukaio.jumpandrun.extramath.Line;
 
@@ -14,12 +15,13 @@ import java.util.ArrayList;
 
 public class WallSensorsComponent extends Component
 {
-    public Line m_wall = new Line();
-    public Line m_ceiling = new Line();
-    public ArrayList<Line> m_collisions = new ArrayList<>();
-    KineticComponent m_kinematic = null;
-    float m_offset_x = 0.0f;
-    float m_offset_y = 0.0f;
+    public Line                     m_wall = new Line();
+    public Line                     m_rescue = new Line();
+    public Line                     m_ceiling = new Line();
+    public ArrayList<Line>          m_collisions = new ArrayList<>();
+    private KineticComponent        m_kinematic = null;
+    private float                   m_offset_x = 0.0f;
+    private float                   m_offset_y = 0.0f;
     
     public WallSensorsComponent(Entity p_entity, Element p_data)
     {
@@ -61,19 +63,28 @@ public class WallSensorsComponent extends Component
     }
     
     @Override
-    public void render(Canvas p_canvas, Paint p_paint)
+    public void render(Viewport p_viewport, Paint p_paint)
     {
-        p_paint.setColor(Color.RED);
-        p_canvas.drawLine(m_wall.m_start.x,
-                          m_wall.m_start.y,
-                          m_wall.m_end.x,
-                          m_wall.m_end.y,
-                          p_paint);
-        p_canvas.drawLine(m_ceiling.m_start.x,
-                          m_ceiling.m_start.y,
-                          m_ceiling.m_end.x,
-                          m_ceiling.m_end.y,
-                          p_paint);
+        if(Game.DEBUG_ON)
+        {
+            p_paint.setColor(Color.RED);
+            p_viewport.draw_line(m_wall,
+                                 p_paint);
+            p_viewport.draw_line(m_ceiling,
+                                 p_paint);
+            p_viewport.draw_line(m_rescue,
+                                 p_paint);
+        }
+    }
+    
+    @Override
+    protected void destroy()
+    {
+        m_wall = null;
+        m_rescue = null;
+        m_ceiling = null;
+        m_collisions = null;
+        m_kinematic = null;
     }
     
     public static void update_position(WallSensorsComponent p_sensor)
@@ -91,8 +102,13 @@ public class WallSensorsComponent extends Component
         p_sensor.m_wall.m_end.y = (int) (y - p_sensor.m_offset_y);
         
         p_sensor.m_ceiling.m_start.x = (int) x;
-        p_sensor.m_ceiling.m_start.y = (int) y;
+        p_sensor.m_ceiling.m_start.y = (int) (y - p_sensor.m_offset_y);
         p_sensor.m_ceiling.m_end.x = (int) x;
         p_sensor.m_ceiling.m_end.y = (int) (y - half_w);
+        
+        p_sensor.m_rescue.m_start.x = (int) (x - (half_w + p_sensor.m_offset_x) * 0.5f);
+        p_sensor.m_rescue.m_start.y = (int) (y);
+        p_sensor.m_rescue.m_end.x = (int) (x + (half_w - p_sensor.m_offset_x) * 0.5f);
+        p_sensor.m_rescue.m_end.y = (int) (y);
     }
 }

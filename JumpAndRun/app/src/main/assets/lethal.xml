@@ -3,6 +3,6 @@
  <Components>
   <Bitmap/>
   <spike_component/>
-  <Rectangle_collider offset_x="8" offset_y="8"/>
+  <Rectangle_collider offset_x="8" offset_y="8" shrink_x="2" shrink_y="2"/>
  </Components>
 </collect>

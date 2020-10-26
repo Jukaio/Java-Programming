@@ -42,7 +42,7 @@ public class MovementSensorsTilemapCollision extends System
 
     }
 
-    Line to_draw = null;
+    Line to_draw = new Line();
     Point to_draw_circle = new Point(20, 20);
     @Override
     public void update(ECS p_ecs, ArrayList<Entity> p_entities)
@@ -116,7 +116,7 @@ public class MovementSensorsTilemapCollision extends System
                                                  
                     // TODO: Speed down if kinetic velocity is in direction of new dir x
                     float gravity_activator = (kinematic.get_velocity().m_x.floatValue() != 0.0f) ? 0 : 1;
-                    float final_redistributed_velocity = ((gravity.m_drag * 0) * line_gravity_cross) + kinetic_velocity_dot; // Replace 0 with gravity_activator for slope effect
+                    float final_redistributed_velocity = kinetic_velocity_dot; // Replace 0 with gravity_activator for slope effect
     
                     // Clamp to line
                     float width = transform.get_dimensions().m_x.floatValue();
@@ -130,6 +130,10 @@ public class MovementSensorsTilemapCollision extends System
                     float player_line_dot = dot_product(point_x, point_y, line_dir_x, line_dir_y);
                     float clamp_to_line_x = (line_dir_x * player_line_dot) + collision_line.m_start.x;
                     float clamp_to_line_y = (line_dir_y * player_line_dot) + collision_line.m_start.y;
+                    float some_length = Formulas.length(clamp_to_line_x, clamp_to_line_y);
+                    
+                    to_draw.m_end.x = (int) clamp_to_line_x ;
+                    to_draw.m_end.y = (int) clamp_to_line_y ;
                     clamp_to_line_x = (clamp_to_line_x - (line_inner_perpendicular_dir_x * width * 0.5f));
                     clamp_to_line_y = (clamp_to_line_y - (line_inner_perpendicular_dir_y * height * 0.5f));
     
@@ -138,7 +142,8 @@ public class MovementSensorsTilemapCollision extends System
                     float to_apply_y = (next_dir_y * final_redistributed_velocity) + clamp_to_line_y;
                     float to_apply_angle = -Formulas.angleatan2(line_inner_perpendicular_dir_x,
                                                                 line_inner_perpendicular_dir_y) * Formulas.R2D;
-    
+                    to_draw.m_start.x = (int) position_x;
+                    to_draw.m_start.y = (int) position_y;
                     if(line_gravity_dot != 0.0f)
                     {
                         transform.set_rotation(to_apply_angle);
@@ -151,7 +156,6 @@ public class MovementSensorsTilemapCollision extends System
                         transform.set_position(position_x,
                                                position_y);
                     }
-                    to_draw = collision_line;
                 }
             }
         }

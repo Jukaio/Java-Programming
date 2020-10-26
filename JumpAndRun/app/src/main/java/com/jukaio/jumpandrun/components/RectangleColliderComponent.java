@@ -1,22 +1,24 @@
 package com.jukaio.jumpandrun.components;
 
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
-import com.jukaio.jumpandrun.Entity;
-import com.jukaio.jumpandrun.World;
+import com.jukaio.jumpandrun.entity.Entity;
+import com.jukaio.jumpandrun.Game;
+import com.jukaio.jumpandrun.Viewport;
+import com.jukaio.jumpandrun.world.World;
 import com.jukaio.jumpandrun.XML;
-import com.jukaio.jumpandrun.extramath.Formulas;
 
 import org.w3c.dom.Element;
 
 public class RectangleColliderComponent extends Component
 {
-    private RectF m_rectangle_collider = new RectF();
-    public float offset_x = 0.0f;
-    public float offset_y = 0.0f;
+    private RectF       m_rectangle_collider    = new RectF();
+    private float       offset_x                = 0.0f;
+    private float       offset_y                = 0.0f;
+    private float       shrink_x                = 0.0f;
+    private float       shrink_y                = 0.0f;
     
     public RectangleColliderComponent(Entity p_entity, World p_world, Element p_data)
     {
@@ -24,6 +26,8 @@ public class RectangleColliderComponent extends Component
         p_world.m_collisionAABB.push_back_collider(this);
         offset_x = XML.parse_float(p_data, "offset_x");
         offset_y = XML.parse_float(p_data, "offset_y");
+        shrink_x = XML.parse_float(p_data, "shrink_x");
+        shrink_y = XML.parse_float(p_data, "shrink_y");
     }
     
     @Override
@@ -57,18 +61,23 @@ public class RectangleColliderComponent extends Component
     }
     
     @Override
-    public void render(Canvas p_canvas, Paint p_paint)
+    public void render(Viewport p_viewport, Paint p_paint)
     {
-        final boolean DEBUG = true;
-        if(DEBUG)
+        if(Game.DEBUG_ON)
         {
             p_paint.setColor(Color.CYAN);
             p_paint.setStyle(Paint.Style.STROKE);
-            p_canvas.drawRect(m_rectangle_collider,
-                              p_paint);
+            p_viewport.draw_rect(m_rectangle_collider,
+                                 p_paint);
             p_paint.setStyle(Paint.Style.FILL_AND_STROKE);
         }
         
+    }
+    
+    @Override
+    protected void destroy()
+    {
+        m_rectangle_collider    = null;
     }
     
     public static void update_collider(RectangleColliderComponent p_collider)
@@ -78,10 +87,10 @@ public class RectangleColliderComponent extends Component
         final float half_w = p_collider.get_entity().get_dimensions().m_y.floatValue() * 0.5f;
         final float half_h = p_collider.get_entity().get_dimensions().m_y.floatValue() * 0.5f;
         
-        p_collider.m_rectangle_collider.top = y - half_h + p_collider.offset_x;
-        p_collider.m_rectangle_collider.bottom = y + half_h + p_collider.offset_y;
-        p_collider.m_rectangle_collider.left = x - half_w + p_collider.offset_x;
-        p_collider.m_rectangle_collider.right = x + half_w + p_collider.offset_y;
+        p_collider.m_rectangle_collider.top = y - half_h + p_collider.offset_x + p_collider.shrink_y;
+        p_collider.m_rectangle_collider.bottom = y + half_h + p_collider.offset_y - p_collider.shrink_y;
+        p_collider.m_rectangle_collider.left = x - half_w + p_collider.offset_x + p_collider.shrink_x;
+        p_collider.m_rectangle_collider.right = x + half_w + p_collider.offset_y - p_collider.shrink_x;
         
         
     }

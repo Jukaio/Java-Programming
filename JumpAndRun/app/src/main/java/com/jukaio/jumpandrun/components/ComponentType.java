@@ -13,7 +13,9 @@ public enum ComponentType
     JUMP,
     RECTANGLE_COLLIDER,
     COIN,
-    COIN_COUNT,
+    RESOURCE_COUNT,
     SPIKE_COMPONENT,
-    GET_HIT
+    GET_HIT,
+    WORLD_SELECTOR,
+    
 }

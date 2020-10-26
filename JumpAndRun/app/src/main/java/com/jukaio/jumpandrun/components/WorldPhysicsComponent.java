@@ -1,15 +1,15 @@
 package com.jukaio.jumpandrun.components;
 
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
-import android.util.Log;
 
-import com.jukaio.jumpandrun.Entity;
-import com.jukaio.jumpandrun.World;
+import com.jukaio.jumpandrun.CollisionDetection;
+import com.jukaio.jumpandrun.entity.Entity;
+import com.jukaio.jumpandrun.Game;
+import com.jukaio.jumpandrun.world.TileMap;
+import com.jukaio.jumpandrun.Viewport;
+import com.jukaio.jumpandrun.world.World;
 import com.jukaio.jumpandrun.XML;
-import com.jukaio.jumpandrun.collision.CollisionDetection;
 import com.jukaio.jumpandrun.extramath.Formulas;
 import com.jukaio.jumpandrun.extramath.Line;
 
@@ -19,16 +19,16 @@ import java.util.ArrayList;
 
 public class WorldPhysicsComponent extends Component
 {
-    private GroundSensorsComponent m_ground_sensors = null;
-    private WallSensorsComponent m_wall_sensors = null;
-    private World.TileMap m_tile_map = null;
-    private KineticComponent m_kinematic = null;
-    
-    float m_previous_x = 0.0f;
-    float m_previous_y = 0.0f;
-    float m_gravity = 0.0f;
-    int m_detection_range_x = 0;
-    int m_detection_range_y = 0;
+    private GroundSensorsComponent  m_ground_sensors    = null;
+    private WallSensorsComponent    m_wall_sensors      = null;
+    private TileMap                 m_tile_map          = null;
+    private KineticComponent        m_kinematic         = null;
+    private float                   m_previous_x        = 0.0f;
+    private float                   m_previous_y        = 0.0f;
+    private float                   m_gravity           = 0.0f;
+    private int                     m_detection_range_x = 0;
+    private int                     m_detection_range_y = 0;
+    ArrayList<Line>                 m_checked           = new ArrayList<>();
 
     public WorldPhysicsComponent(Entity p_entity, World p_world, Element p_data)
     {
@@ -79,7 +79,7 @@ public class WorldPhysicsComponent extends Component
         x += vel_x;
         y += vel_y;
         get_entity().set_position(x,
-                                  y + m_gravity);
+                                  y + m_gravity); // TODO: change back to m_gravity
     
         if(vel_x != 0.0f)
          {
@@ -95,41 +95,62 @@ public class WorldPhysicsComponent extends Component
             if (m_ground_sensors.m_collisions.size() != 0 && m_ground_sensors.m_active)
                 lerp_to_collision_lines();
         }
+        
         else
         {
             Line closest_wall = closest_line(x, y, m_wall_sensors.m_collisions);
-            float difference = x - closest_wall.m_start.x;
+            float difference_x = x - closest_wall.m_start.x;
+            float difference_y = y - closest_wall.m_start.y;
+            difference_x = (difference_x != 0.0f) ? difference_x / Math.abs(difference_x) : 0.0f;
+            difference_y = (difference_y != 0.0f) ? difference_y / Math.abs(difference_y) : 0.0f;
+            
             if(m_ground_sensors.m_collisions.size() != 0)
             {
-                get_entity().set_position(m_previous_x + (difference * 0.25f),
+                get_entity().set_position(m_previous_x + (difference_x),
                                           y);
             }
             else
-                get_entity().set_position(m_previous_x + (difference * 0.25f), m_previous_y + m_gravity);
+            {
+                get_entity().set_position(m_previous_x + (difference_x),
+                                          m_previous_y + m_gravity + difference_y);
+            }
             m_kinematic.set_velocity(0, 0);
         }
     }
-    ArrayList<Line> m_checked = new ArrayList<>();
-    @Override
-    public void render(Canvas p_canvas, Paint p_paint)
-    {
-        int color = p_paint.getColor();
-        p_paint.setColor(Color.GREEN);
-        p_paint.setStrokeWidth(5.0f);
-        //p_canvas.drawCircle(to_draw_circle.x, to_draw_circle.y, 2.0f, p_paint);
-        
 
-        for(Line line : m_checked)
+    @Override
+    public void render(Viewport p_viewport, Paint p_paint)
+    {
+        if(Game.DEBUG_ON)
         {
-            p_canvas.drawLine(line.m_start.x, line.m_start.y, line.m_end.x, line.m_end.y, p_paint);
+            int color = p_paint.getColor();
+            p_paint.setColor(Color.BLUE);
+            p_paint.setStrokeWidth(5.0f);
+
+    
+            p_paint.setColor(Color.GREEN);
+            for (Line line : m_checked)
+            {
+                p_viewport.draw_line(line,
+                                     p_paint);
+            }
+            p_paint.setStrokeWidth(1.0f);
+
+            p_paint.setColor(color);
         }
-        
-        
-        p_paint.setStrokeWidth(1.0f);
-        p_paint.setColor(color);
-        
+    }
+    
+    @Override
+    protected void destroy()
+    {
+        m_ground_sensors    = null;
+        m_wall_sensors      = null;
+        m_tile_map          = null;
+        m_kinematic         = null;
+        m_checked           = null;
         
     }
+    
     
     private void get_ground_collisions(ArrayList<Line> out_collisions)
     {
@@ -202,9 +223,11 @@ public class WorldPhysicsComponent extends Component
                                                                             line);
                         boolean ceiling_collided = CollisionDetection.LineLine(m_wall_sensors.m_ceiling,
                                                                                line);
+                        boolean rescue_collided = CollisionDetection.LineLine(m_wall_sensors.m_rescue,
+                                                                                                       line);
                         m_checked.add(line);
                         // TODO: Handle wall colision correctly - Wall has a fucking normal of (abs(1) | 0)
-                        if (wall_collided || ceiling_collided)
+                        if (wall_collided || ceiling_collided || rescue_collided)
                         {
                             out_collisions.add(line);
                         }
@@ -214,7 +237,6 @@ public class WorldPhysicsComponent extends Component
         }
     }
     
-    Point to_draw_circle = new Point(20, 20);
     private void lerp_to_collision_lines()
     {
     
@@ -228,6 +250,7 @@ public class WorldPhysicsComponent extends Component
         float line_y = collision_line.m_end.y - collision_line.m_start.y;
         float line_length = Formulas.length(line_x,
                                             line_y);
+        
         float line_dir_x = line_x / line_length;
         float line_dir_y = line_y / line_length;
         
@@ -250,40 +273,41 @@ public class WorldPhysicsComponent extends Component
         float sin_angle = (float) Math.sin(-angle);
         float next_dir_x = (cos_angle * gravity_x) - (sin_angle * gravity_y);
         float next_dir_y = (sin_angle * gravity_x) + (cos_angle * gravity_y);
-        float kinetic_velocity_dot = (next_dir_x * m_kinematic.get_velocity().m_x.floatValue()) +
-                                     (next_dir_y * m_kinematic.get_velocity().m_y.floatValue());
-    
-        // TODO: Speed down if kinetic velocity is in direction of new dir x
-        float gravity_activator = (m_kinematic.get_velocity().m_x.floatValue() != 0.0f) ? 0 : 1;
-        float final_redistributed_velocity = kinetic_velocity_dot; // Replace 0 with gravity_activator for slope effect
         
+        
+        float vel_length = Formulas.length(m_kinematic.get_velocity().m_x.floatValue(),
+                                           m_kinematic.get_velocity().m_y.floatValue());
+        float vel_dir_x = (vel_length != 0.0f) ? m_kinematic.get_velocity().m_x.floatValue() / vel_length : 0.0f;
+        float vel_dir_y = (vel_length != 0.0f) ? m_kinematic.get_velocity().m_y.floatValue() / vel_length : 0.0f;
+        
+        float vel_angle = Formulas.angleatan2(line_y, line_x);
+        cos_angle = (float) Math.cos(vel_angle);
+        sin_angle = (float) Math.sin(vel_angle);
+        vel_dir_x = (cos_angle * vel_dir_x) - (sin_angle * vel_dir_y);
+        vel_dir_y = (sin_angle * vel_dir_x) + (cos_angle * vel_dir_y);
+       
         // Clamp to line
         float width = get_entity().get_dimensions().m_x.floatValue();
         float height = get_entity().get_dimensions().m_y.floatValue();
-        float point_x = m_previous_x - collision_line.m_start.x;
-        float point_y = m_previous_y - collision_line.m_start.y;
+        
+        float point_x = (m_previous_x + (vel_dir_x * vel_length)) - collision_line.m_start.x;
+        float point_y = (m_previous_y + (vel_dir_y * vel_length)) - collision_line.m_start.y;
         float player_line_dot = dot_product(point_x,
                                             point_y,
                                             line_dir_x,
                                             line_dir_y);
         float clamp_to_line_x = (line_dir_x * player_line_dot) + collision_line.m_start.x;
         float clamp_to_line_y = (line_dir_y * player_line_dot) + collision_line.m_start.y;
-        clamp_to_line_x = (clamp_to_line_x - (line_inner_perpendicular_dir_x * width * 0.5f));
-        clamp_to_line_y = (clamp_to_line_y - (line_inner_perpendicular_dir_y * height * 0.5f));
+        clamp_to_line_x = (clamp_to_line_x - (line_inner_perpendicular_dir_x * (width * 0.5f)));
+        clamp_to_line_y = (clamp_to_line_y - (line_inner_perpendicular_dir_y * (height * 0.5f)));
         
-        //to_draw_circle.x = (int) (clamp_to_line_x);
-        //to_draw_circle.y = (int) (clamp_to_line_y);
     
         // Apply changes
-        float to_apply_x = (next_dir_x * final_redistributed_velocity) + clamp_to_line_x;
-        float to_apply_y = (next_dir_y * final_redistributed_velocity) + clamp_to_line_y;
         float to_apply_angle = -Formulas.angleatan2(line_inner_perpendicular_dir_x,
                                                     line_inner_perpendicular_dir_y) * Formulas.R2D;
-    
-    
         get_entity().set_rotation(to_apply_angle);
-        get_entity().set_position(to_apply_x,
-                                  to_apply_y);
+        get_entity().set_position(clamp_to_line_x,
+                                  clamp_to_line_y);
     
     
     }

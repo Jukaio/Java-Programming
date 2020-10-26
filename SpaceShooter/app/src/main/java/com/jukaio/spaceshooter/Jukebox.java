@@ -20,7 +20,7 @@ public class Jukebox
     {
         AudioAttributes attributes = new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_GAME)
-                .setContentType(AudioAttributes.CONTENT_TYPE_UNKNOWN)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build();
     
         m_sound_pool = new SoundPool.Builder()

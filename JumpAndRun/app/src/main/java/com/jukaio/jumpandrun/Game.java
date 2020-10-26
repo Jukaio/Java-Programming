@@ -4,40 +4,40 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 
-import java.util.ArrayList;
+import com.jukaio.jumpandrun.input.InputDevice;
+import com.jukaio.jumpandrun.input.InputManager;
+import com.jukaio.jumpandrun.world.WorldManager;
+
+import java.io.IOException;
 
 public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callback
 {
+    public static final boolean DEBUG_ON            = false;
     private class Renderer
     {
         public SurfaceHolder m_holder;
         public Canvas m_canvas;
         public Paint m_paint;
     }
-
+    private Viewport            m_viewport          = null;
     private final static String TAG                 = "GAME";
     private Thread              m_game_thread       = null;
     private volatile boolean    m_running           = false;
     private Renderer            m_renderer          = null;
+    private InputManager        m_input_manager     = new InputManager();
+    private WorldManager        m_world_manager     = new WorldManager();
+    private Jukebox             m_jukebox           = new Jukebox();
+    private MusicPlayer         m_music             = new MusicPlayer();
     
+    public int m_width = 1280;
+    public int m_height = 720;
     
-    private InputManager m_input_manager = new InputManager();
-    private WorldManager m_world_manager = new WorldManager();
-    private Jukebox m_jukebox = new Jukebox();
-
-    int m_width = 0;
-    int m_height = 0;
-    int m_zoom = 0;
-
     public Game(Context context, AttributeSet attrs) {
         super(context, attrs);
         Log.d(TAG, "Game Constructor");
@@ -68,9 +68,42 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
         //Entity.GAME = this;
 
         create_renderer();
-        SoundID.LEVEL_ONE = m_jukebox.load_sound(getContext(), "SpaceBG.ogg");
-        m_world_manager.create_world("level_two.xml", getContext());
-        //Jukebox.play(SoundID.LEVEL_ONE, Jukebox.MAX_VOLUME, 0);
+        //SoundID.LEVEL_ONE = m_jukebox.load_sound(getContext(), "SpaceBG.ogg");
+        SoundID.GET_COIN = m_jukebox.load_sound(getContext(), "coin.wav");
+        SoundID.GET_HIT = m_jukebox.load_sound(getContext(), "damage.wav");
+        
+        MusicID.LEVEL_ONE = m_music.load_music(getContext(), "level_one.wav");
+        MusicID.LEVEL_TWO = m_music.load_music(getContext(), "level_two.wav");
+        MusicID.LEVEL_THREE = m_music.load_music(getContext(), "level_three.wav");
+        
+        MusicPlayer.set_track(MusicID.LEVEL_ONE);
+        MusicPlayer.play();
+    
+        String[] paths = null;
+        try
+        {
+            paths = getContext().getAssets().list("levels");
+        }
+        catch (IOException p_e)
+        {
+            p_e.printStackTrace();
+            throw new AssertionError("'levels' folder not found");
+        }
+        
+        if(paths.length == 0)
+        {
+            throw new AssertionError("No levels found in level folder");
+        }
+        
+        for(String file : paths)
+        {
+            m_world_manager.create_world("levels/"+file, getContext());
+        }
+        
+        m_viewport = new Viewport(m_width, m_height, 0.0f, 184.0f);
+        
+        m_world_manager.set_current_world(0);
+        m_world_manager.start();
 
     }
 
@@ -80,6 +113,7 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
             return false;
 
         p_renderer.m_canvas = p_renderer.m_holder.lockCanvas();
+        
         return (p_renderer.m_canvas != null);
     }
 
@@ -89,9 +123,6 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
         m_renderer.m_holder = getHolder();
         m_renderer.m_holder.addCallback(this);
         m_renderer.m_paint = new Paint();
-        m_zoom = getResources().getInteger(R.integer.zoom);
-        m_renderer.m_holder.setFixedSize(getResources().getInteger(R.integer.screen_width) / m_zoom,
-                getResources().getInteger(R.integer.screen_height) / m_zoom);
     }
     
     public void add_controls(InputDevice p_controls)
@@ -102,7 +133,6 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     @Override
     public void run()
     {
-        m_world_manager.start();
     
         double time_point = System.nanoTime();
         double delta_time = System.nanoTime() - time_point;
@@ -130,10 +160,9 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
         if(!lock_canvas(m_renderer))
             return;
         m_renderer.m_canvas.drawColor(Color.BLACK);
-
-        m_world_manager.render(m_renderer.m_canvas, m_renderer.m_paint);
-
-
+        m_viewport.set_canvas(m_renderer.m_canvas);
+        
+        m_world_manager.render(m_viewport, m_renderer.m_paint);
 
         m_renderer.m_holder.unlockCanvasAndPost(m_renderer.m_canvas);
     }
@@ -180,7 +209,15 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     {
         Log.d(TAG, "onDestroy");
         m_renderer.m_holder.removeCallback(this);
-        m_game_thread = null;
+        m_world_manager.destroy();
+        m_game_thread       = null;
+        m_input_manager     = null;
+        m_world_manager     = null;
+        m_jukebox           = null;
+        m_music             = null;
+        m_renderer.m_holder = null;
+        m_renderer.m_canvas = null;
+        m_renderer.m_paint  = null;
     }
     
     
@@ -188,6 +225,12 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     public void surfaceCreated(@NonNull final SurfaceHolder p_surfaceHolder)
     {
         Log.d(TAG, "surfaceCreated");
+        if(m_game_thread != null &&
+           m_running)
+        {
+            Log.d(TAG, "Thread started");
+            m_game_thread.start();
+        }
     }
     
     @Override
@@ -198,16 +241,8 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
     {
         Log.d(TAG, "surfaceChanged");
         
-        m_width = p_width;
-        m_height = p_height;
-        //m_surface_holder.setFixedSize(m_width, m_height);
-        
-        if(m_game_thread != null &&
-           m_running)
-        {
-            Log.d(TAG, "Thread started");
-            m_game_thread.start();
-        }
+        m_renderer.m_holder.setFixedSize(m_width, m_height);
+        m_viewport.look_at(0, 0);
     }
     
     @Override
