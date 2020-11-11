@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">asteroids</string>
+    <string name="health">Health: %d</string>
+    <string name="level">Level: %d</string>
+    <string name="fps">FPS: %d</string>
+    <string name="gameOver">Game Over!</string>
+    <string name="gameWin">You Win!</string>
+    <string name="restart">(press minus to restart)</string>
+    </resources>

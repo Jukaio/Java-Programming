@@ -18,7 +18,9 @@ import java.io.IOException;
 
 public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callback
 {
+    private final static String TAG                 = "GAME";
     public static final boolean DEBUG_ON            = false;
+    
     private class Renderer
     {
         public SurfaceHolder m_holder;
@@ -26,7 +28,6 @@ public class Game extends SurfaceView implements Runnable, SurfaceHolder.Callbac
         public Paint m_paint;
     }
     private Viewport            m_viewport          = null;
-    private final static String TAG                 = "GAME";
     private Thread              m_game_thread       = null;
     private volatile boolean    m_running           = false;
     private Renderer            m_renderer          = null;
